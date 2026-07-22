@@ -299,9 +299,9 @@
     <!-- Bonde + balai dans la piscine (centre-droit, comme le croquis) -->
     <circle cx="505" cy="235" r="7" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
     <text class="lbl-small" x="505" y="221" text-anchor="middle">bonde</text>
-    <circle cx="560" cy="225" r="7" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
-    <text class="lbl-small" x="565" y="207" text-anchor="middle">balai</text>
-    <text class="lbl-small" x="330" y="348" text-anchor="middle">refoulements (chacun sa vanne)</text>
+    <circle cx="450" cy="345" r="7" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
+    <text class="lbl-small" x="450" y="331" text-anchor="middle">balai</text>
+    <text class="lbl-small" x="290" y="348" text-anchor="middle">refoulements (chacun sa vanne)</text>
 
     <!-- Bassin rond (en bas à droite) -->
     <circle cx="765" cy="330" r="65" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
@@ -317,14 +317,14 @@
     <path id="p_vbt2" class="pipe" d="M590,66 L590,94 L850,94 L850,560"/>
     <!-- Aspirations : bonde piscine, balai, bonde bassin -->
     <path id="p_vb"   class="pipe" d="M505,242 L505,560"/>
-    <path id="p_vbl"  class="pipe" d="M560,232 L560,560"/>
+    <path id="p_vbl"  class="pipe" d="M450,352 L450,560"/>
     <path id="p_vbb"  class="pipe" d="M765,395 L765,560"/>
     <!-- Collecteur d'aspiration (tout arrive par la droite, comme le schéma des vannes) -->
     <path id="p_colR1" class="pipe" d="M874,560 L850,560"/>
     <path id="p_colR2" class="pipe" d="M850,560 L765,560"/>
-    <path id="p_colR3" class="pipe" d="M765,560 L560,560"/>
-    <path id="p_colR4" class="pipe" d="M560,560 L505,560"/>
-    <path id="p_colR5" class="pipe" d="M505,560 L430,560"/>
+    <path id="p_colR3" class="pipe" d="M765,560 L505,560"/>
+    <path id="p_colR4" class="pipe" d="M505,560 L450,560"/>
+    <path id="p_colR5" class="pipe" d="M450,560 L430,560"/>
     <path id="p_feed"  class="pipe" d="M430,560 L430,664"/>
 
     <!-- Pompe -> vanne 6 voies -> filtre (2 liaisons : aller + retour) -->
@@ -345,7 +345,6 @@
     <path id="p_man4"  class="pipe" d="M660,430 L712,430"/>
     <!-- Refoulements piscine : 3 sur le mur bas + 1 côté bassin + 1 dans les marches -->
     <path id="p_jr1"  class="pipe" d="M185,430 L185,362"/>
-    <path id="p_jr2"  class="pipe" d="M420,430 L420,362"/>
     <path id="p_jr3"  class="pipe" d="M580,430 L580,362"/>
     <path id="p_jr4"  class="pipe" d="M660,430 L660,345 L642,345"/>
     <path id="p_jr5"  class="pipe" d="M100,430 L100,280"/>
@@ -411,12 +410,11 @@
   // ---------- Vannes ----------
   const VALVES = {
     vb:   { x: 505, y: 535, label: 'Bonde piscine',  lx: -108, ly: 4,   open: false },
-    vbl:  { x: 560, y: 495, label: 'Balai',          lx: 14,   ly: 4,   open: false },
+    vbl:  { x: 450, y: 495, label: 'Balai',          lx: 14,   ly: 4,   open: false },
     vbb:  { x: 765, y: 505, label: 'Bonde bassin',   lx: -108, ly: 4,   open: true  },
     vbt1: { x: 874, y: 480, label: 'Bonde bac G',    lx: -96,  ly: -12, open: true  },
     vbt2: { x: 850, y: 160, label: 'Bonde bac D',    lx: -96,  ly: 4,   open: true  },
     vr1:  { x: 185, y: 395, label: '',               lx: 0,    ly: 0,   open: true  },
-    vr2:  { x: 420, y: 395, label: '',               lx: 0,    ly: 0,   open: true  },
     vr3:  { x: 580, y: 395, label: '',               lx: 0,    ly: 0,   open: true  },
     vr4:  { x: 660, y: 390, label: '',               lx: 0,    ly: 0,   open: true  },
     vr5:  { x: 100, y: 380, label: 'Marches',        lx: -10,  ly: 26,  open: true  },
@@ -445,12 +443,12 @@
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
-      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr2: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration normale (avec bac tampon)',
       steps: [
         'Les deux bondes du bac tampon ouvertes, bonde de fond et balai fermés',
         'Vanne 6 voies sur FILTRATION',
-        'Refoulements piscine (5 vannes : 3 mur bas + côté bassin + marches) et bassin rond ouverts, vanne égout fermée',
+        'Refoulements piscine (4 vannes : 2 mur bas + côté bassin + marches) et bassin rond ouverts, vanne égout fermée',
         'Électrolyseur en service (vannes entrée + sortie ouvertes, bypass fermé)',
         'La piscine déborde → le bac tampon récupère l\'eau → la pompe aspire dans le bac',
       ],
@@ -458,7 +456,7 @@
     sansbac: {
       label: '🚱 Filtration sans bac tampon',
       pump: true, pos: 'filtration',
-      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr2: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration sans bac tampon',
       steps: [
         'Fermer les deux bondes du bac tampon',
@@ -470,13 +468,13 @@
     lavage: {
       label: '🧹 Nettoyage filtre à sable',
       pump: true, pos: 'lavage',
-      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: true, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: true, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du filtre à sable — ordre anti-surpression',
       steps: [
         'Couper l\'ÉLECTROLYSEUR (toujours avant la pompe)',
         'Arrêter la POMPE',
         'OUVRIR la vanne égout AVANT de fermer les refoulements → il y a toujours une sortie ouverte',
-        'Fermer les refoulements piscine (5 vannes) et bassin',
+        'Fermer les refoulements piscine (4 vannes) et bassin',
         'Ouvrir l\'aspiration bonde de fond (fermer les bondes du bac tampon si le niveau est trop bas)',
         'Tourner la vanne 6 voies sur LAVAGE — UNIQUEMENT pompe à l\'arrêt (sinon surpression et joint étoile endommagé)',
         'Démarrer la pompe : lavage 2–3 min, jusqu\'à ce que le voyant du filtre soit clair',
@@ -490,7 +488,7 @@
     prefiltre: {
       label: '🧺 Nettoyage préfiltre pompe',
       pump: false, pos: 'ferme',
-      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du préfiltre de la pompe (panier)',
       steps: [
         'Arrêter la pompe et couper l\'électrolyseur',
@@ -504,7 +502,7 @@
     hivernage: {
       label: '❄️ Hivernage',
       pump: false, pos: 'hivernage',
-      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
       title: 'Hivernage',
       steps: [
         'Faire un dernier lavage + rinçage du filtre, puis arrêter la pompe',
@@ -600,7 +598,7 @@
     const hasSuction = v.vb || v.vbl || v.vbb || v.vbt1 || v.vbt2;
     const elPath  = v.vel1 && v.vel2; // passage dans l'électrolyseur = entrée ET sortie ouvertes
     const outPath = elPath || v.vby;
-    const poolRef = v.vr1 || v.vr2 || v.vr3 || v.vr4 || v.vr5;
+    const poolRef = v.vr1 || v.vr3 || v.vr4 || v.vr5;
     const anyRef  = poolRef || v.vrb;
     const toRef   = state.pos === 'filtration' || state.pos === 'circulation';
     const toEgout = state.pos === 'lavage' || state.pos === 'rincage' || state.pos === 'egout';
@@ -630,11 +628,10 @@
       p_man1:  flow && toRef && outPath && anyRef,
       p_manL:  flow && toRef && outPath && (v.vr1 || v.vr5),
       p_manL2: flow && toRef && outPath && v.vr5,
-      p_man2:  flow && toRef && outPath && (v.vr2 || v.vr3 || v.vr4 || v.vrb),
+      p_man2:  flow && toRef && outPath && (v.vr3 || v.vr4 || v.vrb),
       p_man3:  flow && toRef && outPath && (v.vr4 || v.vrb),
       p_man4:  flow && toRef && outPath && v.vrb,
       p_jr1:   flow && toRef && outPath && v.vr1,
-      p_jr2:   flow && toRef && outPath && v.vr2,
       p_jr3:   flow && toRef && outPath && v.vr3,
       p_jr4:   flow && toRef && outPath && v.vr4,
       p_jr5:   flow && toRef && outPath && v.vr5,
