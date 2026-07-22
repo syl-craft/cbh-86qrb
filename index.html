@@ -668,6 +668,8 @@
     if (state.pump && toRef && (v.vel1 !== v.vel2) && !v.vby)
       warnings.push('⚠️ Vannes électrolyseur incohérentes : entrée et sortie doivent être ouvertes toutes les deux (ou bypass ouvert).');
     if (state.lowLevel)
+      warnings.push('⛔ Sécurité manque d\'eau : pompe COUPÉE automatiquement tant que l\'électrovanne remplit le bac tampon.');
+    if (state.lowLevel)
       warnings.push('💧 Niveau bac tampon BAS — électrovanne ouverte, remplissage automatique en eau de ville. L\'eau neuve dilue le sel : si ça se répète, chercher une fuite et re-tester le taux (cercle vicieux fuite → remplissage → sel qui baisse).');
 
     const electroOn = flow && toRef && elPath;
@@ -742,6 +744,7 @@
     renderedScenario = null; // re-cliquer un scénario remet la check-list à zéro
     const sc = SCENARIOS[id];
     state.pump = sc.pump;
+    if (state.lowLevel) { state.pumpBeforeLow = sc.pump; state.pump = false; } // sécurité manque d'eau
     state.pos = sc.pos;
     state.scenario = id;
     Object.entries(sc.v).forEach(([vid, open]) => VALVES[vid].open = open);
@@ -770,13 +773,29 @@
   }
   requestAnimationFrame(tick);
 
-  const toggleLevel = () => { state.lowLevel = !state.lowLevel; update(); };
+  // Sécurité manque d'eau : niveau bas => électrovanne ouverte ET pompe coupée automatiquement
+  const toggleLevel = () => {
+    state.lowLevel = !state.lowLevel;
+    if (state.lowLevel) {
+      state.pumpBeforeLow = state.pump;
+      state.pump = false;
+    } else {
+      state.pump = state.pumpBeforeLow ?? state.pump;
+    }
+    update();
+  };
   $('levelBtn').addEventListener('click', toggleLevel);
   $('sensorBody').addEventListener('click', toggleLevel);
   $('evBody').addEventListener('click', toggleLevel);
 
-  $('pumpBtn').addEventListener('click', () => { state.pump = !state.pump; state.scenario = null; update(); });
-  $('pumpBody').addEventListener('click', () => { state.pump = !state.pump; state.scenario = null; update(); });
+  const togglePump = () => {
+    if (state.lowLevel && !state.pump) { update(); return; } // verrouillée tant que le niveau est bas
+    state.pump = !state.pump;
+    state.scenario = null;
+    update();
+  };
+  $('pumpBtn').addEventListener('click', togglePump);
+  $('pumpBody').addEventListener('click', togglePump);
   $('mpBody').addEventListener('click', () => {
     const i = MP_POSITIONS.findIndex(p => p.id === state.pos);
     state.pos = MP_POSITIONS[(i + 1) % MP_POSITIONS.length].id;
