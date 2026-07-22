@@ -549,7 +549,16 @@
         '<circle cx="' + v.x + '" cy="' + v.y + '" r="11"/>' +
         '<rect x="' + (v.x - 8) + '" y="' + (v.y - 3) + '" width="16" height="6"/>' +
         (v.label ? '<text x="' + (v.x + v.lx) + '" y="' + (v.y + v.ly) + '">' + v.label + '</text>' : '');
-      grp.addEventListener('click', () => { v.open = !v.open; state.scenario = null; update(); });
+      grp.addEventListener('click', () => {
+        v.open = !v.open;
+        // Bypass électrolyseur : bascule automatique des 3 vannes
+        if (id === 'vby') {
+          VALVES.vel1.open = !v.open;
+          VALVES.vel2.open = !v.open;
+        }
+        state.scenario = null;
+        update();
+      });
       g.appendChild(grp);
     });
   }
