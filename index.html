@@ -21,7 +21,7 @@
     background: #fff;
     border-radius: 20px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-    max-width: 980px;
+    max-width: 1020px;
     width: 100%;
     padding: 20px;
     margin: 8px 0 24px;
@@ -132,7 +132,6 @@
 
   .arrows path { fill: #075985; opacity: 0.95; pointer-events: none; }
   .arrows.freshArr path { fill: #0f766e; }
-  @keyframes flow { to { stroke-dashoffset: -24; } }
 
   .valve { cursor: pointer; }
   .valve circle { fill: #fff; stroke-width: 3; }
@@ -250,7 +249,7 @@
 <body>
 <div class="card">
   <h1>💧 Flux hydraulique de la piscine</h1>
-  <div class="subtitle">Piscine à débordement · bac tampon · bassin rond · clique sur les vannes, la pompe ou la vanne 6 voies</div>
+  <div class="subtitle">Disposition fidèle au schéma des vannes · clique sur les vannes, la pompe ou la vanne 6 voies</div>
 
   <div class="scenarios" id="scenarios"></div>
 
@@ -261,106 +260,123 @@
   </div>
 
   <div class="scene">
-  <svg viewBox="0 0 900 880" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 960 880" xmlns="http://www.w3.org/2000/svg">
     <!-- ================= BASSINS ================= -->
+    <!-- Piscine -->
+    <rect x="90" y="40" width="470" height="210" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
+    <text class="lbl" x="325" y="100" text-anchor="middle">Piscine (à débordement)</text>
+    <path d="M90,75 A70,70 0 0 0 90,215 Z" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
+    <text class="lbl-small" x="52" y="148" text-anchor="middle">Marches</text>
+
+    <!-- Bonde + balai dans la piscine -->
+    <circle cx="140" cy="228" r="7" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
+    <text class="lbl-small" x="140" y="214" text-anchor="middle">bonde</text>
+    <circle cx="300" cy="228" r="7" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
+    <text class="lbl-small" x="300" y="214" text-anchor="middle">balai</text>
+
+    <!-- Bassin rond -->
+    <circle cx="615" cy="350" r="45" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
+    <text class="lbl-small" x="615" y="354" text-anchor="middle">Bassin rond</text>
+
     <!-- Bac tampon -->
-    <rect x="150" y="30" width="480" height="55" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="2"/>
-    <rect id="bacWater" x="152" y="34" width="476" height="49" rx="6" fill="#bae6fd"/>
-    <text class="lbl" x="390" y="63" text-anchor="middle">Bac tampon</text>
+    <rect x="700" y="430" width="150" height="100" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="2"/>
+    <rect id="bacWater" x="702" y="434" width="146" height="92" rx="6" fill="#bae6fd"/>
+    <text class="lbl" x="775" y="480" text-anchor="middle">Bac tampon</text>
+    <circle cx="720" cy="510" r="6" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
+    <circle cx="830" cy="510" r="6" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
 
     <!-- Capteur de niveau -->
     <g id="sensorBody" style="cursor:pointer">
-      <line x1="560" y1="38" x2="560" y2="66" stroke="#475569" stroke-width="2.5"/>
-      <circle id="sensorFloat" cx="560" cy="70" r="7" fill="#475569"/>
-      <text class="lbl-small" x="560" y="20" text-anchor="middle">capteur niveau</text>
+      <line x1="735" y1="436" x2="735" y2="500" stroke="#475569" stroke-width="2.5"/>
+      <circle id="sensorFloat" cx="735" cy="442" r="7" fill="#475569"/>
+      <text class="lbl-small" x="735" y="424" text-anchor="middle">capteur</text>
     </g>
 
     <!-- Remplissage automatique (eau de ville) -->
-    <path id="p_ev" class="pipe" style="stroke-width:6" d="M868,58 L634,58"/>
+    <path id="p_ev" class="pipe" style="stroke-width:6" d="M790,360 L790,430"/>
     <g id="evBody" style="cursor:pointer">
-      <rect id="evRect" x="728" y="46" width="24" height="24" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
-      <text class="lbl-small" x="740" y="38" text-anchor="middle">électrovanne (auto)</text>
+      <rect id="evRect" x="778" y="380" width="24" height="24" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
     </g>
-    <text class="lbl-small" x="866" y="44" text-anchor="end">eau de ville</text>
-
-    <!-- Piscine -->
-    <rect x="140" y="100" width="500" height="260" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
-    <text class="lbl" x="390" y="140" text-anchor="middle">Piscine (débordement côté haut)</text>
-
-    <!-- Marches en arrondi -->
-    <path d="M140,160 A78,78 0 0 0 140,310 Z" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
-    <text class="lbl-small" x="95" y="240" text-anchor="middle">Marches</text>
-
-    <!-- Bassin rond -->
-    <circle cx="760" cy="330" r="65" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
-    <text class="lbl-small" x="760" y="330" text-anchor="middle">Bassin rond</text>
+    <text class="lbl-small" x="790" y="352" text-anchor="middle">eau de ville (électrovanne)</text>
 
     <!-- Débordement (gravitaire) -->
-    <path id="p_over1" class="pipe" style="stroke-width:3" d="M250,100 L250,86"/>
-    <path id="p_over2" class="pipe" style="stroke-width:3" d="M390,100 L390,86"/>
-    <path id="p_over3" class="pipe" style="stroke-width:3" d="M530,100 L530,86"/>
-    <text class="lbl-small" x="660" y="95">débordement</text>
+    <path id="p_over" class="pipe" style="stroke-width:3" d="M560,70 L770,70 L770,430"/>
+    <text class="lbl-small" x="620" y="60">débordement (gravité)</text>
 
     <!-- Local technique -->
-    <rect x="70" y="455" width="770" height="400" rx="12" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 5"/>
-    <text class="lbl-small" x="90" y="478">LOCAL TECHNIQUE</text>
+    <rect x="75" y="325" width="875" height="510" rx="12" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <text class="lbl-small" x="95" y="348">LOCAL TECHNIQUE</text>
 
     <!-- ================= TUYAUX (sens = sens de l'eau) ================= -->
     <!-- Aspirations -->
-    <path id="p_vbt"  class="pipe" d="M150,58 L110,58 L110,580 L250,580"/>
-    <path id="p_vb"   class="pipe" d="M240,335 L240,580"/>
-    <path id="p_vbl"  class="pipe" d="M320,335 L320,580 L250,580"/>
-    <path id="p_vbb"  class="pipe" d="M760,395 L760,580 L320,580"/>
-    <path id="p_feed" class="pipe" d="M250,580 L250,632"/>
+    <path id="p_vb"    class="pipe" d="M140,250 L140,470"/>
+    <path id="p_vbl"   class="pipe" d="M300,250 L300,470"/>
+    <path id="p_vbb"   class="pipe" d="M615,395 L615,470"/>
+    <path id="p_vbt1"  class="pipe" d="M720,516 L720,560 L640,560 L640,470"/>
+    <path id="p_vbt2"  class="pipe" d="M830,516 L830,575 L590,575 L590,470"/>
+    <!-- Collecteur (gauche vers pompe, droite vers pompe) -->
+    <path id="p_colL1" class="pipe" d="M140,470 L300,470"/>
+    <path id="p_colL2" class="pipe" d="M300,470 L430,470"/>
+    <path id="p_colR1" class="pipe" d="M640,470 L615,470"/>
+    <path id="p_colR2" class="pipe" d="M615,470 L590,470"/>
+    <path id="p_colR3" class="pipe" d="M590,470 L430,470"/>
+    <path id="p_feed"  class="pipe" d="M430,470 L430,574"/>
 
-    <!-- Pompe -> vanne 6 voies -->
-    <path id="p_pout" class="pipe" d="M278,660 L350,660"/>
-    <!-- Vanne 6 voies <-> filtre -->
-    <path id="p_mpf"  class="pipe" d="M430,685 L430,733"/>
-    <!-- Sortie vers électrolyseur -->
-    <path id="p_mpo"  class="pipe" d="M450,660 L620,660"/>
-    <path id="p_eli"  class="pipe" d="M620,660 L620,572"/>
-    <path id="p_elo"  class="pipe" d="M620,488 L620,460"/>
-    <path id="p_byp"  class="pipe" d="M620,660 L680,660 L680,460 L620,460"/>
-    <path id="p_fman" class="pipe" d="M620,460 L620,430"/>
-    <!-- Refoulements piscine -->
-    <path id="p_manl" class="pipe" d="M620,430 L380,430"/>
-    <path id="p_jet1" class="pipe" d="M400,430 L400,362"/>
-    <path id="p_jet2" class="pipe" d="M470,430 L470,362"/>
-    <path id="p_jet3" class="pipe" d="M540,430 L540,362"/>
-    <!-- Refoulement bassin rond -->
-    <path id="p_manr" class="pipe" d="M620,430 L700,430 L700,312"/>
+    <!-- Pompe -> vanne 6 voies -> filtre -->
+    <path id="p_pout" class="pipe" d="M456,600 L490,600"/>
+    <path id="p_mpf"  class="pipe" d="M512,625 L512,660"/>
+    <path id="p_mpfo" class="pipe" d="M558,660 L558,625"/>
+    <!-- Sortie vers électrolyseur (montée à droite) -->
+    <path id="p_mpo"  class="pipe" d="M580,600 L880,600 L880,540"/>
+    <path id="p_eli"  class="pipe" d="M880,540 L880,466"/>
+    <path id="p_elo"  class="pipe" d="M880,378 L880,300"/>
+    <path id="p_byp"  class="pipe" d="M880,540 L925,540 L925,300 L880,300"/>
+    <path id="p_fman" class="pipe" d="M880,300 L880,272"/>
+    <!-- Nourrice de refoulement -->
+    <path id="p_man1" class="pipe" d="M880,272 L615,272"/>
+    <path id="p_manb" class="pipe" d="M615,272 L615,303"/>
+    <path id="p_man2" class="pipe" d="M615,272 L560,272 L560,290 L480,290"/>
+    <path id="p_man3" class="pipe" d="M480,290 L200,290"/>
+    <path id="p_jr1"  class="pipe" d="M200,290 L200,252"/>
+    <path id="p_jr2"  class="pipe" d="M250,290 L250,252"/>
+    <path id="p_jr3"  class="pipe" d="M480,290 L480,252"/>
     <!-- Égout -->
-    <path id="p_ego"  class="pipe" d="M370,685 L370,760 L180,760 L180,845"/>
-    <text class="lbl" x="180" y="838" text-anchor="middle" dy="28">⬇ Égout</text>
+    <path id="p_ego"  class="pipe" d="M490,612 L470,612 L470,800 L900,800"/>
+    <text class="lbl" x="912" y="790">Égout</text>
+    <path d="M900,812 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M905,824 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
 
     <!-- ================= ÉQUIPEMENTS ================= -->
     <!-- Pompe -->
     <g id="pumpBody">
-      <circle id="pumpCircle" cx="250" cy="660" r="28" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>
-      <path d="M240,672 L240,648 L264,660 Z" fill="#fff"/>
-      <text class="lbl" x="250" y="712" text-anchor="middle">Pompe + préfiltre</text>
+      <circle id="pumpCircle" cx="430" cy="600" r="26" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>
+      <path d="M421,611 L421,589 L443,600 Z" fill="#fff"/>
+      <text class="lbl" x="405" y="648">Pompe + préfiltre</text>
     </g>
 
     <!-- Vanne 6 voies -->
     <g id="mpBody">
-      <rect x="350" y="635" width="100" height="50" rx="8" fill="#334155" stroke="#0f172a" stroke-width="2"/>
-      <text class="lbl-white" id="mpText" x="400" y="656" text-anchor="middle">6 voies</text>
-      <text class="lbl-white" id="mpPosText" x="400" y="674" text-anchor="middle" style="font-size:11px; fill:#7dd3fc">FILTRATION</text>
+      <rect x="490" y="575" width="90" height="50" rx="8" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+      <text class="lbl-white" x="535" y="596" text-anchor="middle">6 voies</text>
+      <text class="lbl-white" id="mpPosText" x="535" y="614" text-anchor="middle" style="font-size:10px; fill:#7dd3fc">FILTRATION</text>
     </g>
 
-    <!-- Filtre à sable -->
-    <circle cx="430" cy="788" r="55" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
-    <text class="lbl-white" x="430" y="784" text-anchor="middle">Filtre</text>
-    <text class="lbl-white" x="430" y="800" text-anchor="middle">à sable</text>
+    <!-- Filtre à sable (carré avec cercle, comme le schéma) -->
+    <rect x="485" y="660" width="100" height="100" rx="8" fill="#fff" stroke="#475569" stroke-width="2.5"/>
+    <circle cx="535" cy="710" r="36" fill="#ef4444" stroke="#b91c1c" stroke-width="2.5"/>
+    <text class="lbl-white" x="535" y="706" text-anchor="middle" style="font-size:11px">Filtre</text>
+    <text class="lbl-white" x="535" y="720" text-anchor="middle" style="font-size:11px">sable</text>
 
     <!-- Électrolyseur -->
     <g id="electroBody">
-      <rect id="electroRect" x="598" y="488" width="44" height="84" rx="8" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-      <text class="lbl-small" x="662" y="525" >Électrolyseur</text>
-      <text class="lbl-small" id="electroState" x="662" y="540">arrêté</text>
+      <rect id="electroRect" x="858" y="380" width="44" height="84" rx="8" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text class="lbl-small" x="850" y="415" text-anchor="end">Électrolyseur</text>
+      <text class="lbl-small" id="electroState" x="850" y="430" text-anchor="end">arrêté</text>
     </g>
-    <text class="lbl-small" x="695" y="620">bypass</text>
+    <text class="lbl-small" x="947" y="425" text-anchor="end">bypass</text>
+
+    <!-- Label refoulements -->
+    <text class="lbl-small" x="330" y="315" text-anchor="middle">refoulements piscine (chacun sa vanne)</text>
 
     <!-- Vannes (injectées en JS) -->
     <g id="valves"></g>
@@ -386,15 +402,19 @@
 
   // ---------- Vannes ----------
   const VALVES = {
-    vbt: { x: 110, y: 400, label: 'Bac tampon',   lx: 14,  ly: 4,  open: true  },
-    vb:  { x: 240, y: 470, label: 'Bonde',        lx: -60, ly: 4,  open: false },
-    vbl: { x: 320, y: 470, label: 'Balai',        lx: 14,  ly: 4,  open: false },
-    vbb: { x: 760, y: 480, label: 'Bonde bassin', lx: 14,  ly: 4,  open: true  },
-    vrp: { x: 585, y: 430, label: 'Refoul. piscine', lx: -20, ly: -18, open: true },
-    vrb: { x: 700, y: 395, label: 'Refoul. bassin',  lx: 14,  ly: 4,  open: true },
-    ve:  { x: 275, y: 760, label: 'Égout',        lx: -14, ly: 24, open: false },
-    vel: { x: 620, y: 615, label: 'Électro',      lx: -70, ly: 4,  open: true  },
-    vby: { x: 680, y: 560, label: '',             lx: 14,  ly: 4,  open: false },
+    vb:   { x: 140, y: 390, label: 'Bonde piscine',  lx: 14,   ly: 4,   open: false },
+    vbl:  { x: 300, y: 390, label: 'Balai',          lx: 14,   ly: 4,   open: false },
+    vbb:  { x: 615, y: 432, label: 'Bonde bassin',   lx: -102, ly: 4,   open: true  },
+    vbt1: { x: 680, y: 560, label: 'Bonde bac 1',    lx: -34,  ly: -18, open: true  },
+    vbt2: { x: 740, y: 575, label: 'Bonde bac 2',    lx: -20,  ly: 26,  open: true  },
+    vr1:  { x: 200, y: 271, label: '',               lx: 0,    ly: 0,   open: true  },
+    vr2:  { x: 250, y: 271, label: '',               lx: 0,    ly: 0,   open: true  },
+    vr3:  { x: 480, y: 271, label: '',               lx: 0,    ly: 0,   open: true  },
+    vrb:  { x: 615, y: 288, label: 'Refoul. bassin', lx: -112, ly: 4,   open: true  },
+    ve:   { x: 470, y: 700, label: 'Égout',          lx: 14,   ly: 4,   open: false },
+    vel1: { x: 880, y: 520, label: 'entrée',         lx: -56,  ly: 4,   open: true  },
+    vel2: { x: 880, y: 340, label: 'sortie',         lx: -56,  ly: 4,   open: true  },
+    vby:  { x: 925, y: 420, label: '',               lx: 0,    ly: 0,   open: false },
   };
 
   const MP_POSITIONS = [
@@ -415,23 +435,23 @@
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
-      v: { vbt: true, vb: false, vbl: false, vbb: true, vrp: true, vrb: true, ve: false, vel: true, vby: false },
+      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr2: true, vr3: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration normale (avec bac tampon)',
       steps: [
-        'Aspiration sur le bac tampon ouverte, bonde de fond et balai fermés',
+        'Les deux bondes du bac tampon ouvertes, bonde de fond et balai fermés',
         'Vanne 6 voies sur FILTRATION',
-        'Refoulements piscine et bassin rond ouverts, vanne égout fermée',
-        'Électrolyseur en service (vanne électro ouverte, bypass fermé)',
+        'Refoulements piscine (3 vannes) et bassin rond ouverts, vanne égout fermée',
+        'Électrolyseur en service (vannes entrée + sortie ouvertes, bypass fermé)',
         'La piscine déborde → le bac tampon récupère l\'eau → la pompe aspire dans le bac',
       ],
     },
     sansbac: {
       label: '🚱 Filtration sans bac tampon',
       pump: true, pos: 'filtration',
-      v: { vbt: false, vb: true, vbl: false, vbb: true, vrp: true, vrb: true, ve: false, vel: true, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr2: true, vr3: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration sans bac tampon',
       steps: [
-        'Fermer l\'aspiration du bac tampon',
+        'Fermer les deux bondes du bac tampon',
         'Ouvrir la bonde de fond de la piscine',
         'Vanne 6 voies sur FILTRATION, refoulements ouverts',
         '⚠️ Le débordement continue de remplir le bac tampon : surveiller le niveau de la piscine (l\'eau part dans le bac et n\'est pas réaspirée)',
@@ -440,31 +460,31 @@
     lavage: {
       label: '🧹 Nettoyage filtre à sable',
       pump: true, pos: 'lavage',
-      v: { vbt: false, vb: true, vbl: false, vbb: false, vrp: false, vrb: false, ve: true, vel: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vrb: false, ve: true, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du filtre à sable — ordre anti-surpression',
       steps: [
         'Couper l\'ÉLECTROLYSEUR (toujours avant la pompe)',
         'Arrêter la POMPE',
         'OUVRIR la vanne égout AVANT de fermer les refoulements → il y a toujours une sortie ouverte',
-        'Fermer les refoulements piscine et bassin',
-        'Ouvrir l\'aspiration bonde de fond (fermer le bac tampon si le niveau est trop bas)',
+        'Fermer les refoulements piscine (3 vannes) et bassin',
+        'Ouvrir l\'aspiration bonde de fond (fermer les bondes du bac tampon si le niveau est trop bas)',
         'Tourner la vanne 6 voies sur LAVAGE — UNIQUEMENT pompe à l\'arrêt (sinon surpression et joint étoile endommagé)',
         'Démarrer la pompe : lavage 2–3 min, jusqu\'à ce que le voyant du filtre soit clair',
         'Arrêter la pompe, tourner sur RINÇAGE, pompe 30 s, arrêter la pompe',
         'Tourner sur FILTRATION (pompe toujours à l\'arrêt)',
         'ROUVRIR les refoulements AVANT de refermer la vanne égout → jamais toutes sorties fermées',
-        'Rétablir l\'aspiration normale (bac tampon), fermer la bonde si besoin',
+        'Rétablir l\'aspiration normale (bondes bac tampon), fermer la bonde si besoin',
         'Démarrer la pompe, vérifier la pression au manomètre, puis relancer l\'électrolyseur',
       ],
     },
     prefiltre: {
       label: '🧺 Nettoyage préfiltre pompe',
       pump: false, pos: 'ferme',
-      v: { vbt: false, vb: false, vbl: false, vbb: false, vrp: false, vrb: false, ve: false, vel: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du préfiltre de la pompe (panier)',
       steps: [
         'Arrêter la pompe et couper l\'électrolyseur',
-        'Fermer TOUTES les vannes d\'aspiration (bac tampon, bonde, balai, bonde bassin)',
+        'Fermer TOUTES les vannes d\'aspiration (2 bondes bac tampon, bonde, balai, bonde bassin)',
         'Fermer les refoulements pour éviter le retour d\'eau, vanne 6 voies sur FERMÉ',
         'Ouvrir le couvercle de la pompe, sortir et rincer le panier',
         'Remettre le panier, vérifier le joint du couvercle, refermer',
@@ -474,11 +494,11 @@
     hivernage: {
       label: '❄️ Hivernage',
       pump: false, pos: 'hivernage',
-      v: { vbt: false, vb: false, vbl: false, vbb: false, vrp: false, vrb: false, ve: false, vel: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr2: false, vr3: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
       title: 'Hivernage',
       steps: [
         'Faire un dernier lavage + rinçage du filtre, puis arrêter la pompe',
-        'Couper et vidanger l\'électrolyseur (retirer la cellule si gel possible)',
+        'Couper et vidanger l\'électrolyseur (retirer la cellule si gel possible), fermer ses 3 vannes',
         'Baisser le niveau d\'eau sous les refoulements, vider le bac tampon',
         'Fermer toutes les vannes',
         'Vidanger la pompe, le préfiltre et le filtre à sable (bouchons de purge)',
@@ -528,7 +548,7 @@
   function buildWaterOverlays() {
     document.querySelectorAll('path.pipe').forEach(p => {
       const w = p.cloneNode();
-      w.setAttribute('class', 'water' + (p.id.startsWith('p_over') ? ' gravity' : '') + (p.id === 'p_ev' ? ' fresh' : ''));
+      w.setAttribute('class', 'water' + (p.id === 'p_over' ? ' gravity' : '') + (p.id === 'p_ev' ? ' fresh' : ''));
       w.id = 'w_' + p.id;
       w.style.display = 'none';
       p.parentNode.insertBefore(w, p.nextSibling);
@@ -567,35 +587,46 @@
     const v = {};
     Object.entries(VALVES).forEach(([id, val]) => v[id] = val.open);
 
-    const hasSuction = v.vb || v.vbl || v.vbt || v.vbb;
+    const hasSuction = v.vb || v.vbl || v.vbb || v.vbt1 || v.vbt2;
+    const elPath  = v.vel1 && v.vel2; // passage dans l'électrolyseur = entrée ET sortie ouvertes
+    const outPath = elPath || v.vby;
+    const anyRef  = v.vr1 || v.vr2 || v.vr3 || v.vrb;
+    const poolRef = v.vr1 || v.vr2 || v.vr3;
     const toRef   = state.pos === 'filtration' || state.pos === 'circulation';
     const toEgout = state.pos === 'lavage' || state.pos === 'rincage' || state.pos === 'egout';
-    const destOK  = toRef ? ((v.vrp || v.vrb) && (v.vel || v.vby)) : (toEgout ? v.ve : false);
+    const destOK  = toRef ? (anyRef && outPath) : (toEgout ? v.ve : false);
     const flow    = state.pump && hasSuction && destOK;
 
     const active = {
-      p_vbt:  flow && v.vbt,
-      p_vb:   flow && v.vb,
-      p_vbl:  flow && v.vbl,
-      p_vbb:  flow && v.vbb,
-      p_feed: flow,
-      p_pout: flow,
-      p_mpf:  flow && (state.pos === 'filtration' || state.pos === 'lavage' || state.pos === 'rincage'),
-      p_mpo:  flow && toRef,
-      p_eli:  flow && toRef && v.vel,
-      p_elo:  flow && toRef && v.vel,
-      p_byp:  flow && toRef && v.vby,
-      p_fman: flow && toRef && (v.vel || v.vby),
-      p_manl: flow && toRef && (v.vel || v.vby) && v.vrp,
-      p_jet1: flow && toRef && (v.vel || v.vby) && v.vrp,
-      p_jet2: flow && toRef && (v.vel || v.vby) && v.vrp,
-      p_jet3: flow && toRef && (v.vel || v.vby) && v.vrp,
-      p_manr: flow && toRef && (v.vel || v.vby) && v.vrb,
-      p_ego:  flow && toEgout && v.ve,
-      p_over1: flow && toRef && v.vrp,
-      p_over2: flow && toRef && v.vrp,
-      p_over3: flow && toRef && v.vrp,
-      p_ev:   state.lowLevel,
+      p_vb:    flow && v.vb,
+      p_vbl:   flow && v.vbl,
+      p_vbb:   flow && v.vbb,
+      p_vbt1:  flow && v.vbt1,
+      p_vbt2:  flow && v.vbt2,
+      p_colL1: flow && v.vb,
+      p_colL2: flow && (v.vb || v.vbl),
+      p_colR1: flow && v.vbt1,
+      p_colR2: flow && (v.vbt1 || v.vbb),
+      p_colR3: flow && (v.vbt1 || v.vbb || v.vbt2),
+      p_feed:  flow,
+      p_pout:  flow,
+      p_mpf:   flow && (state.pos === 'filtration' || state.pos === 'lavage' || state.pos === 'rincage'),
+      p_mpfo:  flow && (state.pos === 'filtration' || state.pos === 'lavage' || state.pos === 'rincage'),
+      p_mpo:   flow && toRef,
+      p_eli:   flow && toRef && elPath,
+      p_elo:   flow && toRef && elPath,
+      p_byp:   flow && toRef && v.vby,
+      p_fman:  flow && toRef && outPath,
+      p_man1:  flow && toRef && outPath && anyRef,
+      p_manb:  flow && toRef && outPath && v.vrb,
+      p_man2:  flow && toRef && outPath && poolRef,
+      p_man3:  flow && toRef && outPath && (v.vr1 || v.vr2),
+      p_jr1:   flow && toRef && outPath && v.vr1,
+      p_jr2:   flow && toRef && outPath && v.vr2,
+      p_jr3:   flow && toRef && outPath && v.vr3,
+      p_ego:   flow && toEgout && v.ve,
+      p_over:  flow && toRef && outPath && poolRef,
+      p_ev:    state.lowLevel,
     };
 
     // Alertes
@@ -608,10 +639,12 @@
       warnings.push('⛔ Vanne 6 voies FERMÉE/HIVERNAGE avec pompe en marche — INTERDIT !');
     if (flow && toEgout)
       warnings.push('ℹ️ Eau envoyée à l\'égout — le niveau de la piscine baisse.');
+    if (state.pump && toRef && (v.vel1 !== v.vel2) && !v.vby)
+      warnings.push('⚠️ Vannes électrolyseur incohérentes : entrée et sortie doivent être ouvertes toutes les deux (ou bypass ouvert).');
     if (state.lowLevel)
       warnings.push('💧 Niveau bac tampon BAS — électrovanne ouverte, remplissage automatique en eau de ville. L\'eau neuve dilue le sel : si ça se répète, chercher une fuite et re-tester le taux (cercle vicieux fuite → remplissage → sel qui baisse).');
 
-    const electroOn = flow && toRef && v.vel;
+    const electroOn = flow && toRef && elPath;
     return { active, warnings, electroOn };
   }
 
@@ -619,7 +652,7 @@
   function update() {
     const { active, warnings, electroOn } = computeFlow();
 
-    // Tuyaux
+    // Tuyaux + flèches
     document.querySelectorAll('path.pipe').forEach(p => {
       const w = $('w_' + p.id);
       if (w) w.style.display = active[p.id] ? '' : 'none';
@@ -643,10 +676,10 @@
     MP_POSITIONS.forEach(p => $('mp_' + p.id).classList.toggle('active', p.id === state.pos));
 
     // Bac tampon : niveau + électrovanne + capteur
-    $('bacWater').setAttribute('y', state.lowLevel ? 66 : 34);
-    $('bacWater').setAttribute('height', state.lowLevel ? 17 : 49);
+    $('bacWater').setAttribute('y', state.lowLevel ? 498 : 434);
+    $('bacWater').setAttribute('height', state.lowLevel ? 28 : 92);
     $('evRect').setAttribute('fill', state.lowLevel ? '#f59e0b' : '#94a3b8');
-    $('sensorFloat').setAttribute('cy', state.lowLevel ? 74 : 62);
+    $('sensorFloat').setAttribute('cy', state.lowLevel ? 500 : 442);
     $('sensorFloat').setAttribute('fill', state.lowLevel ? '#ef4444' : '#10b981');
     $('levelBtn').classList.toggle('low', state.lowLevel);
     $('levelBtn').textContent = state.lowLevel ? '💧 Bac tampon : NIVEAU BAS' : '💧 Bac tampon : niveau OK';
