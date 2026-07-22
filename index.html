@@ -377,6 +377,13 @@
     <!-- Filtre à sable (carré avec cercle, en bas à gauche comme le schéma) -->
     <rect x="240" y="745" width="100" height="100" rx="8" fill="#fff" stroke="#475569" stroke-width="2.5"/>
     <circle cx="290" cy="795" r="36" fill="#ef4444" stroke="#b91c1c" stroke-width="2.5"/>
+    <g id="filterAnim" style="display:none">
+      <circle class="fbubble" cx="276" cy="795" r="3" fill="#bae6fd" opacity="0.9"/>
+      <circle class="fbubble" cx="290" cy="795" r="2.5" fill="#e0f2fe" opacity="0.85"/>
+      <circle class="fbubble" cx="304" cy="795" r="3" fill="#bae6fd" opacity="0.9"/>
+      <circle class="fbubble" cx="283" cy="795" r="2" fill="#e0f2fe" opacity="0.8"/>
+      <circle class="fbubble" cx="297" cy="795" r="2" fill="#e0f2fe" opacity="0.8"/>
+    </g>
     <text class="lbl-white" x="290" y="791" text-anchor="middle" style="font-size:11px">Filtre</text>
     <text class="lbl-white" x="290" y="805" text-anchor="middle" style="font-size:11px">sable</text>
 
@@ -688,6 +695,9 @@
       if (a) a.style.display = active[p.id] ? '' : 'none';
     });
 
+    // Animation interne du filtre à sable
+    $('filterAnim').style.display = active.p_mpf ? '' : 'none';
+
     // Vannes
     Object.entries(VALVES).forEach(([id, v]) => {
       $('valve_' + id).setAttribute('class', 'valve ' + (v.open ? 'open' : 'closed'));
@@ -760,13 +770,23 @@
 
   // Animation du flux pilotée en JS (requestAnimationFrame) :
   // fiable sur mobile même quand l'économie d'énergie coupe les animations CSS
-  let dashOffset = 0, lastT = 0;
+  let dashOffset = 0, bubblePhase = 0, lastT = 0;
+  const bubbles = () => document.querySelectorAll('#filterAnim .fbubble');
   function tick(t) {
     if (lastT) {
-      dashOffset = (dashOffset - (t - lastT) * 0.034) % 24;
+      const dt = t - lastT;
+      dashOffset = (dashOffset - dt * 0.034) % 24;
       document.querySelectorAll('path.water').forEach(w => {
         if (w.style.display !== 'none') w.setAttribute('stroke-dashoffset', dashOffset);
       });
+      // Particules dans le filtre : descendent en filtration/rinçage, remontent en lavage (contre-courant)
+      if ($('filterAnim').style.display !== 'none') {
+        bubblePhase = (bubblePhase + dt * 0.025) % 52;
+        bubbles().forEach((b, i) => {
+          const off = (bubblePhase + i * 11) % 52;
+          b.setAttribute('cy', 769 + (state.pos === 'lavage' ? 52 - off : off));
+        });
+      }
     }
     lastT = t;
     requestAnimationFrame(tick);
