@@ -172,11 +172,65 @@
     padding: 14px 16px;
   }
 
-  .steps h3 { font-size: 0.95rem; color: #0369a1; margin-bottom: 8px; }
+  .steps h3 { font-size: 0.95rem; color: #0369a1; margin-bottom: 4px; }
 
-  .steps ol { padding-left: 22px; }
+  .steps .hint { font-size: 0.72rem; color: #94a3b8; margin-bottom: 10px; }
 
-  .steps li { font-size: 0.85rem; color: #334155; padding: 3px 0; }
+  .steps ol {
+    list-style: none;
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e0f2fe;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 0.87rem;
+    color: #334155;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .steps li:hover { border-color: #0ea5e9; }
+
+  .steps li::before {
+    content: counter(step);
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .steps li.done {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    border-left-color: #10b981;
+    color: #94a3b8;
+    text-decoration: line-through;
+  }
+
+  .steps li.done::before {
+    content: "✓";
+    background: #10b981;
+  }
 
   .legend {
     display: flex;
@@ -354,6 +408,7 @@
   ];
 
   const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false };
+  let renderedScenario = null;
 
   // ---------- Scénarios ----------
   const SCENARIOS = {
@@ -609,20 +664,23 @@
     // Alertes
     $('warnings').innerHTML = warnings.map(w => '<div class="warning">' + w + '</div>').join('');
 
-    // Étapes
+    // Étapes — reconstruites uniquement au changement de scénario,
+    // pour garder les coches pendant qu'on manipule les vannes
     const box = $('steps');
-    if (state.scenario) {
+    if (state.scenario && state.scenario !== renderedScenario) {
+      renderedScenario = state.scenario;
       const sc = SCENARIOS[state.scenario];
-      box.style.display = '';
-      box.innerHTML = '<h3>' + sc.title + '</h3><ol>' +
+      box.innerHTML = '<h3>' + sc.title + '</h3>' +
+        '<div class="hint">Clique sur une étape pour la cocher au fur et à mesure — la liste reste affichée pendant que tu manipules les vannes</div><ol>' +
         sc.steps.map(s => '<li>' + s + '</li>').join('') + '</ol>';
-    } else {
-      box.style.display = '';
-      box.innerHTML = '<h3>Mode personnalisé</h3><ol><li>Clique sur un scénario pour recharger une configuration type, ou continue à manipuler les vannes librement.</li></ol>';
+      box.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', () => li.classList.toggle('done'));
+      });
     }
   }
 
   function applyScenario(id) {
+    renderedScenario = null; // re-cliquer un scénario remet la check-list à zéro
     const sc = SCENARIOS[id];
     state.pump = sc.pump;
     state.pos = sc.pos;
