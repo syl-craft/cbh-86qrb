@@ -129,6 +129,9 @@
            stroke-dasharray: 10 14; animation: flow 0.7s linear infinite; pointer-events: none; }
   .gravity { stroke-width: 3; stroke-dasharray: 4 6; animation-duration: 1s; }
   .fresh { stroke: #2dd4bf; }
+
+  .arrows path { fill: #075985; opacity: 0.95; pointer-events: none; }
+  .arrows.freshArr path { fill: #0f766e; }
   @keyframes flow { to { stroke-dashoffset: -24; } }
 
   .valve { cursor: pointer; }
@@ -472,6 +475,33 @@
     });
   }
 
+  // Flèches de direction le long de chaque tuyau (sens de l'eau)
+  function buildArrows() {
+    document.querySelectorAll('path.pipe').forEach(p => {
+      const total = p.getTotalLength();
+      const grp = document.createElementNS(SVGNS, 'g');
+      grp.setAttribute('class', 'arrows' + (p.id === 'p_ev' ? ' freshArr' : ''));
+      grp.id = 'arr_' + p.id;
+      grp.style.display = 'none';
+
+      const spacing = 80;
+      const positions = total < 50
+        ? [total / 2]
+        : Array.from({ length: Math.floor((total - 40) / spacing) + 1 }, (_, i) => 40 + i * spacing);
+
+      positions.forEach(d => {
+        const pt = p.getPointAtLength(d);
+        const ahead = p.getPointAtLength(Math.min(d + 5, total));
+        const angle = Math.atan2(ahead.y - pt.y, ahead.x - pt.x) * 180 / Math.PI;
+        const a = document.createElementNS(SVGNS, 'path');
+        a.setAttribute('d', 'M6,0 L-5,5.5 L-2,0 L-5,-5.5 Z');
+        a.setAttribute('transform', 'translate(' + pt.x + ',' + pt.y + ') rotate(' + angle + ')');
+        grp.appendChild(a);
+      });
+      p.parentNode.insertBefore(grp, p.nextSibling.nextSibling);
+    });
+  }
+
   // ---------- Logique de flux ----------
   function computeFlow() {
     const v = {};
@@ -533,6 +563,8 @@
     document.querySelectorAll('path.pipe').forEach(p => {
       const w = $('w_' + p.id);
       if (w) w.style.display = active[p.id] ? '' : 'none';
+      const a = $('arr_' + p.id);
+      if (a) a.style.display = active[p.id] ? '' : 'none';
     });
 
     // Vannes
@@ -599,6 +631,7 @@
   buildMpButtons();
   buildValves();
   buildWaterOverlays();
+  buildArrows();
 
   const toggleLevel = () => { state.lowLevel = !state.lowLevel; update(); };
   $('levelBtn').addEventListener('click', toggleLevel);
