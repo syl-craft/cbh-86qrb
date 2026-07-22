@@ -355,6 +355,8 @@
     <path id="p_manb2" class="pipe" d="M712,400 L840,400 L840,332"/>
     <!-- Égout (ligne basse, sortie à droite comme le schéma) -->
     <path id="p_ego"  class="pipe" d="M280,700 L200,700 L200,880 L900,880"/>
+    <!-- Vanne égout gravitaire : vidange du collecteur/bac tampon sans pompe -->
+    <path id="p_veg"  class="pipe" d="M820,560 L820,880 L900,880"/>
     <text class="lbl" x="912" y="872">Égout</text>
     <path d="M898,896 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
     <path d="M903,908 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
@@ -429,6 +431,7 @@
     vr5:  { x: 100, y: 380, label: 'Marches',        lx: -10,  ly: 26,  open: true  },
     vrb:  { x: 712, y: 410, label: 'Refoul. bassin', lx: 14,   ly: 14,  open: true  },
     ve:   { x: 560, y: 880, label: 'Égout',          lx: 14,   ly: -12, open: false },
+    vegr: { x: 820, y: 700, label: 'Égout gravitaire', lx: 14, ly: 4,   open: false },
     vel1: { x: 345, y: 612, label: 'entrée',         lx: -56,  ly: 4,   open: true  },
     vel2: { x: 345, y: 444, label: 'sortie',         lx: -56,  ly: 4,   open: true  },
     vby:  { x: 390, y: 505, label: 'bypass',         lx: 12,   ly: 4,   open: false },
@@ -452,7 +455,7 @@
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
-      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration normale (avec bac tampon)',
       steps: [
         'Les deux bondes du bac tampon ouvertes, bonde de fond et balai fermés',
@@ -465,7 +468,7 @@
     sansbac: {
       label: '🚱 Filtration sans bac tampon',
       pump: true, pos: 'filtration',
-      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration sans bac tampon',
       steps: [
         'Fermer les deux bondes du bac tampon',
@@ -477,7 +480,7 @@
     lavage: {
       label: '🧹 Nettoyage filtre à sable',
       pump: true, pos: 'lavage',
-      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: true, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: true, vegr: false, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du filtre à sable — ordre anti-surpression',
       steps: [
         'Couper l\'ÉLECTROLYSEUR (toujours avant la pompe)',
@@ -497,7 +500,7 @@
     prefiltre: {
       label: '🧺 Nettoyage préfiltre pompe',
       pump: false, pos: 'ferme',
-      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vegr: false, vel1: false, vel2: false, vby: false },
       title: 'Nettoyage du préfiltre de la pompe (panier)',
       steps: [
         'Arrêter la pompe et couper l\'électrolyseur',
@@ -511,12 +514,12 @@
     hivernage: {
       label: '❄️ Hivernage',
       pump: false, pos: 'hivernage',
-      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vel1: false, vel2: false, vby: false },
+      v: { vbt1: false, vbt2: false, vb: false, vbl: false, vbb: false, vr1: false, vr3: false, vr4: false, vr5: false, vrb: false, ve: false, vegr: false, vel1: false, vel2: false, vby: false },
       title: 'Hivernage',
       steps: [
         'Faire un dernier lavage + rinçage du filtre, puis arrêter la pompe',
         'Couper et vidanger l\'électrolyseur (retirer la cellule si gel possible), fermer ses 3 vannes',
-        'Baisser le niveau d\'eau sous les refoulements, vider le bac tampon',
+        'Baisser le niveau d\'eau sous les refoulements, vider le bac tampon par la vanne égout gravitaire',
         'Fermer toutes les vannes',
         'Vidanger la pompe, le préfiltre et le filtre à sable (bouchons de purge)',
         'Mettre la vanne 6 voies en position HIVERNAGE (entre deux positions)',
@@ -656,6 +659,7 @@
       p_manb:  flow && toRef && outPath && v.vrb,
       p_manb2: flow && toRef && outPath && v.vrb,
       p_ego:   flow && toEgout && v.ve,
+      p_veg:   v.vegr && (v.vbt1 || v.vbt2 || v.vbb || v.vb || v.vbl),
       p_ov1:   flow && toRef && outPath && poolRef,
       p_ov2:   flow && toRef && outPath && poolRef,
       p_ov3:   flow && toRef && outPath && poolRef,
@@ -672,6 +676,10 @@
       warnings.push('⛔ Vanne 6 voies FERMÉE/HIVERNAGE avec pompe en marche — INTERDIT !');
     if (flow && toEgout)
       warnings.push('ℹ️ Eau envoyée à l\'égout — le niveau de la piscine baisse.');
+    if (v.vegr && state.pump)
+      warnings.push('⚠️ Vanne égout gravitaire ouverte avec la pompe en marche — la pompe risque d\'aspirer de l\'air et le circuit se vide à l\'égout !');
+    else if (v.vegr && (v.vbt1 || v.vbt2 || v.vbb || v.vb || v.vbl))
+      warnings.push('ℹ️ Vidange gravitaire en cours — le bac tampon / collecteur se vide à l\'égout (sans pompe).');
     if (state.pump && toRef && (v.vel1 !== v.vel2) && !v.vby)
       warnings.push('⚠️ Vannes électrolyseur incohérentes : entrée et sortie doivent être ouvertes toutes les deux (ou bypass ouvert).');
     if (state.lowLevel)
