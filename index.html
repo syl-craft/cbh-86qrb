@@ -94,6 +94,8 @@
   }
 
   .pump-toggle.on { background: #10b981; }
+  .pump-toggle.level { background: #10b981; }
+  .pump-toggle.level.low { background: #f59e0b; }
 
   .mp-group { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
@@ -126,6 +128,7 @@
   .water { stroke: #0ea5e9; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round;
            stroke-dasharray: 10 14; animation: flow 0.7s linear infinite; pointer-events: none; }
   .gravity { stroke-width: 3; stroke-dasharray: 4 6; animation-duration: 1s; }
+  .fresh { stroke: #2dd4bf; }
   @keyframes flow { to { stroke-dashoffset: -24; } }
 
   .valve { cursor: pointer; }
@@ -196,6 +199,7 @@
 
   <div class="controls">
     <button class="pump-toggle" id="pumpBtn">⏻ Pompe</button>
+    <button class="pump-toggle level" id="levelBtn">💧 Bac tampon : niveau OK</button>
     <div class="mp-group" id="mpGroup"><span class="mp-label">Vanne 6 voies :</span></div>
   </div>
 
@@ -203,8 +207,24 @@
   <svg viewBox="0 0 900 880" xmlns="http://www.w3.org/2000/svg">
     <!-- ================= BASSINS ================= -->
     <!-- Bac tampon -->
-    <rect x="150" y="30" width="480" height="55" rx="8" fill="#bae6fd" stroke="#0ea5e9" stroke-width="2"/>
+    <rect x="150" y="30" width="480" height="55" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="2"/>
+    <rect id="bacWater" x="152" y="34" width="476" height="49" rx="6" fill="#bae6fd"/>
     <text class="lbl" x="390" y="63" text-anchor="middle">Bac tampon</text>
+
+    <!-- Capteur de niveau -->
+    <g id="sensorBody" style="cursor:pointer">
+      <line x1="560" y1="38" x2="560" y2="66" stroke="#475569" stroke-width="2.5"/>
+      <circle id="sensorFloat" cx="560" cy="70" r="7" fill="#475569"/>
+      <text class="lbl-small" x="560" y="20" text-anchor="middle">capteur niveau</text>
+    </g>
+
+    <!-- Remplissage automatique (eau de ville) -->
+    <path id="p_ev" class="pipe" style="stroke-width:6" d="M868,58 L634,58"/>
+    <g id="evBody" style="cursor:pointer">
+      <rect id="evRect" x="728" y="46" width="24" height="24" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+      <text class="lbl-small" x="740" y="38" text-anchor="middle">électrovanne (auto)</text>
+    </g>
+    <text class="lbl-small" x="866" y="44" text-anchor="end">eau de ville</text>
 
     <!-- Piscine -->
     <rect x="140" y="100" width="500" height="260" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2.5"/>
@@ -292,6 +312,7 @@
 
   <div class="legend">
     <span><span class="dot" style="background:#0ea5e9"></span> eau en circulation</span>
+    <span><span class="dot" style="background:#2dd4bf"></span> eau de ville (remplissage auto)</span>
     <span><span class="dot" style="background:#cbd5e1"></span> tuyau inactif</span>
     <span><span class="dot" style="background:#10b981"></span> vanne ouverte</span>
     <span><span class="dot" style="background:#ef4444"></span> vanne fermée</span>
@@ -329,7 +350,7 @@
     { id: 'hivernage',   label: 'Hivernage'   },
   ];
 
-  const state = { pump: true, pos: 'filtration', scenario: 'filtration' };
+  const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false };
 
   // ---------- Scénarios ----------
   const SCENARIOS = {
@@ -444,7 +465,7 @@
   function buildWaterOverlays() {
     document.querySelectorAll('path.pipe').forEach(p => {
       const w = p.cloneNode();
-      w.setAttribute('class', 'water' + (p.id.startsWith('p_over') ? ' gravity' : ''));
+      w.setAttribute('class', 'water' + (p.id.startsWith('p_over') ? ' gravity' : '') + (p.id === 'p_ev' ? ' fresh' : ''));
       w.id = 'w_' + p.id;
       w.style.display = 'none';
       p.parentNode.insertBefore(w, p.nextSibling);
@@ -484,6 +505,7 @@
       p_over1: flow && toRef && v.vrp,
       p_over2: flow && toRef && v.vrp,
       p_over3: flow && toRef && v.vrp,
+      p_ev:   state.lowLevel,
     };
 
     // Alertes
@@ -496,6 +518,8 @@
       warnings.push('⛔ Vanne 6 voies FERMÉE/HIVERNAGE avec pompe en marche — INTERDIT !');
     if (flow && toEgout)
       warnings.push('ℹ️ Eau envoyée à l\'égout — le niveau de la piscine baisse.');
+    if (state.lowLevel)
+      warnings.push('💧 Niveau bac tampon BAS — électrovanne ouverte, remplissage automatique en eau de ville. L\'eau neuve dilue le sel : si ça se répète, chercher une fuite et re-tester le taux (cercle vicieux fuite → remplissage → sel qui baisse).');
 
     const electroOn = flow && toRef && v.vel;
     return { active, warnings, electroOn };
@@ -525,6 +549,15 @@
     const pos = MP_POSITIONS.find(p => p.id === state.pos);
     $('mpPosText').textContent = pos.label.toUpperCase();
     MP_POSITIONS.forEach(p => $('mp_' + p.id).classList.toggle('active', p.id === state.pos));
+
+    // Bac tampon : niveau + électrovanne + capteur
+    $('bacWater').setAttribute('y', state.lowLevel ? 66 : 34);
+    $('bacWater').setAttribute('height', state.lowLevel ? 17 : 49);
+    $('evRect').setAttribute('fill', state.lowLevel ? '#f59e0b' : '#94a3b8');
+    $('sensorFloat').setAttribute('cy', state.lowLevel ? 74 : 62);
+    $('sensorFloat').setAttribute('fill', state.lowLevel ? '#ef4444' : '#10b981');
+    $('levelBtn').classList.toggle('low', state.lowLevel);
+    $('levelBtn').textContent = state.lowLevel ? '💧 Bac tampon : NIVEAU BAS' : '💧 Bac tampon : niveau OK';
 
     // Électrolyseur
     $('electroRect').setAttribute('fill', electroOn ? '#bbf7d0' : '#e2e8f0');
@@ -566,6 +599,11 @@
   buildMpButtons();
   buildValves();
   buildWaterOverlays();
+
+  const toggleLevel = () => { state.lowLevel = !state.lowLevel; update(); };
+  $('levelBtn').addEventListener('click', toggleLevel);
+  $('sensorBody').addEventListener('click', toggleLevel);
+  $('evBody').addEventListener('click', toggleLevel);
 
   $('pumpBtn').addEventListener('click', () => { state.pump = !state.pump; state.scenario = null; update(); });
   $('pumpBody').addEventListener('click', () => { state.pump = !state.pump; state.scenario = null; update(); });
