@@ -126,8 +126,8 @@
 
   .pipe { stroke: #cbd5e1; stroke-width: 8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .water { stroke: #0ea5e9; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round;
-           stroke-dasharray: 10 14; animation: flow 0.7s linear infinite; pointer-events: none; }
-  .gravity { stroke-width: 3; stroke-dasharray: 4 6; animation-duration: 1s; }
+           stroke-dasharray: 10 14; pointer-events: none; }
+  .gravity { stroke-width: 3; stroke-dasharray: 4 6; }
   .fresh { stroke: #2dd4bf; }
 
   .arrows path { fill: #075985; opacity: 0.95; pointer-events: none; }
@@ -728,6 +728,21 @@
   buildValves();
   buildWaterOverlays();
   buildArrows();
+
+  // Animation du flux pilotée en JS (requestAnimationFrame) :
+  // fiable sur mobile même quand l'économie d'énergie coupe les animations CSS
+  let dashOffset = 0, lastT = 0;
+  function tick(t) {
+    if (lastT) {
+      dashOffset = (dashOffset - (t - lastT) * 0.034) % 24; // ~34 px/s
+      document.querySelectorAll('path.water').forEach(w => {
+        if (w.style.display !== 'none') w.setAttribute('stroke-dashoffset', dashOffset);
+      });
+    }
+    lastT = t;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 
   const toggleLevel = () => { state.lowLevel = !state.lowLevel; update(); };
   $('levelBtn').addEventListener('click', toggleLevel);
