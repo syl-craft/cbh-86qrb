@@ -636,8 +636,9 @@
         'Fermer les refoulements piscine (4 vannes) et bassin',
         'Ouvrir l\'aspiration bonde de fond (fermer les bondes du bac tampon si le niveau est trop bas)',
         'Tourner la vanne 6 voies sur LAVAGE — UNIQUEMENT pompe à l\'arrêt (sinon surpression et joint étoile endommagé)',
-        'Démarrer la pompe : lavage 2–3 min, jusqu\'à ce que le voyant du filtre soit clair',
-        'Arrêter la pompe, tourner sur RINÇAGE, pompe 30 s, arrêter la pompe',
+        'Démarrer la pompe : lavage 2–3 min, jusqu\'à ce que le VOYANT du filtre soit clair — seul vrai indicateur de fin',
+        'ℹ️ Si le remplissage automatique du bac se déclenche pendant le lavage, c\'est NORMAL (l\'eau part à l\'égout) — ce n\'est pas un signe de fin de lavage',
+        'Arrêter la pompe, tourner sur RINÇAGE, pompe 30 s, arrêter la pompe — JAMAIS de retour en filtration sans rinçage (l\'eau sale du filtre repartirait dans la piscine par les buses)',
         'Tourner sur FILTRATION (pompe toujours à l\'arrêt)',
         'ROUVRIR les refoulements AVANT de refermer la vanne égout → jamais toutes sorties fermées',
         'Rétablir l\'aspiration normale (bondes bac tampon), fermer la bonde si besoin',
@@ -834,6 +835,8 @@
       warnings.push('ℹ️ Vidange gravitaire en cours — le bac tampon / collecteur se vide à l\'égout (sans pompe).');
     if (state.pump && toRef && (v.vel1 !== v.vel2) && !v.vby)
       warnings.push('⚠️ Vannes électrolyseur incohérentes : entrée et sortie doivent être ouvertes toutes les deux (ou bypass ouvert).');
+    if (state.lowLevel && (state.pos === 'lavage' || state.pos === 'rincage'))
+      warnings.push('ℹ️ Remplissage automatique pendant le lavage/rinçage : NORMAL (l\'eau part à l\'égout et le bac se vide) — ce n\'est PAS la fin du lavage, fie-toi au voyant du filtre.');
     if (state.lowLevel)
       warnings.push('⛔ Sécurité manque d\'eau : pompe COUPÉE automatiquement tant que l\'électrovanne remplit le bac tampon.');
     if (state.lowLevel)
