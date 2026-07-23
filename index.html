@@ -472,8 +472,27 @@
     <!-- Électrolyseur (sur la montée vers la nourrice) -->
     <g id="electroBody">
       <rect id="electroRect" x="323" y="458" width="44" height="84" rx="8" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-      <text class="lbl-small" transform="rotate(-90 345 500)" x="345" y="504" text-anchor="middle" style="fill:#475569; font-weight:600">Électrolyseur</text>
+      <text class="lbl-small" transform="rotate(-90 345 500)" x="345" y="504" text-anchor="middle" style="fill:#475569; font-weight:600">Zodiac Ei</text>
       <text class="lbl-small" id="electroState" x="315" y="504" text-anchor="end">arrêté</text>
+    </g>
+
+    <!-- Détecteur de débit (sécurité électrolyseur) -->
+    <g id="flowSwitch">
+      <line x1="750" y1="596" x2="750" y2="578" stroke="#475569" stroke-width="3"/>
+      <circle cx="750" cy="574" r="5" fill="#475569"/>
+      <text class="lbl-small" x="750" y="562" text-anchor="middle">détecteur de débit</text>
+    </g>
+
+    <!-- Régulation pH : GenpH + sonde + injection pH- -->
+    <g id="genph">
+      <rect x="690" y="668" width="86" height="40" rx="8" fill="#fff" stroke="#64748b" stroke-width="2"/>
+      <text class="lbl-small" x="733" y="685" text-anchor="middle" style="font-weight:700; fill:#475569">GenpH</text>
+      <text class="lbl-small" x="733" y="700" text-anchor="middle" style="font-size:9px">pH auto (7.2)</text>
+      <path d="M700,668 L640,608" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3 4" fill="none"/>
+      <circle cx="640" cy="604" r="5" fill="#fff" stroke="#0369a1" stroke-width="2"/>
+      <text class="lbl-small" x="640" y="628" text-anchor="middle">sonde pH</text>
+      <path d="M766,668 L800,610" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="3 4" fill="none"/>
+      <text class="lbl-small" x="812" y="632" text-anchor="middle">pH−</text>
     </g>
 
     <!-- Vannes (injectées en JS) -->
@@ -549,7 +568,8 @@
         'Les deux bondes du bac tampon ouvertes, bonde de fond et balai fermés',
         'Vanne 6 voies sur FILTRATION',
         'Refoulements piscine (4 vannes : 2 mur bas + côté bassin + marches) et petit bassin ouverts, vanne égout fermée',
-        'Électrolyseur en service (vannes entrée + sortie ouvertes, bypass fermé)',
+        'Électrolyseur Zodiac Ei en service (vannes entrée + sortie ouvertes, bypass fermé) — le détecteur de débit le coupe automatiquement sans circulation',
+        'Le GenpH régule le pH automatiquement (cible ~7.2) — surveiller le niveau du bidon pH-',
         'La piscine déborde → le bac tampon récupère l\'eau → la pompe aspire dans le bac',
       ],
     },
