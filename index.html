@@ -155,16 +155,6 @@
     touch-action: none;
   }
 
-  #fsOverlay.rotated #fsStage {
-    inset: auto;
-    top: 0;
-    left: 0;
-    width: 100vh;
-    height: 100vw;
-    transform: rotate(90deg) translateY(-100%);
-    transform-origin: top left;
-  }
-
   #fsZoom {
     width: 100%;
     height: 100%;
@@ -947,13 +937,8 @@
   let zs = 1, zx = 0, zy = 0;
   const applyZoom = () => { fsZoom.style.transform = 'translate(' + zx + 'px,' + zy + 'px) scale(' + zs + ')'; };
 
-  function updateRotation() {
-    overlay.classList.toggle('rotated', window.innerHeight > window.innerWidth);
-  }
-
   function openFS() {
     overlay.style.display = '';
-    updateRotation();
     fsZoom.appendChild(svgEl);
     moved.forEach(m => $('fsMenu').appendChild(m.el));
     document.body.style.overflow = 'hidden';
@@ -961,9 +946,7 @@
     if (document.documentElement.requestFullscreen)
       document.documentElement.requestFullscreen().catch(() => {});
     if (screen.orientation && screen.orientation.lock)
-      screen.orientation.lock('landscape')
-        .then(() => overlay.classList.remove('rotated'))
-        .catch(() => {});
+      screen.orientation.lock('landscape').catch(() => {});
   }
 
   function closeFS() {
@@ -987,7 +970,6 @@
     m.style.display = m.style.display === 'none' ? '' : 'none';
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') closeFS(); });
-  window.addEventListener('resize', () => { if (overlay.style.display !== 'none' && !document.fullscreenElement) updateRotation(); });
 
   // Zoom pincé + déplacement au doigt (pointer events)
   const stage = $('fsStage');
@@ -1014,9 +996,8 @@
       lastPan = null;
     } else if (pts.length === 1) {
       if (lastPan) {
-        let dx = e.clientX - lastPan.x, dy = e.clientY - lastPan.y;
-        if (overlay.classList.contains('rotated')) { const t = dx; dx = dy; dy = -t; }
-        zx += dx; zy += dy;
+        zx += e.clientX - lastPan.x;
+        zy += e.clientY - lastPan.y;
         applyZoom();
       }
       lastPan = { x: e.clientX, y: e.clientY };
