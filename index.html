@@ -587,22 +587,24 @@
     etat: {
       label: '📷 État actuel (photos)',
       pump: true, pos: 'filtration',
-      v: { vbt1: 100, vbt2: 100, vb: 50, vbl: 0, vbb: 100, vr1: 100, vr3: 100, vr4: 100, vr5: 100, vrb: 100, ve: 0, vegr: 0, vel1: 100, vel2: 100, vby: 50 },
+      v: { vbt1: 100, vbt2: 100, vb: 0, vbl: 0, vbb: 0, vr1: 100, vr3: 100, vr4: 100, vr5: 100, vrb: 100, ve: 0, vegr: 0, vel1: 100, vel2: 100, vby: 50 },
       title: 'État actuel de l\'installation (photos du 23/07/2026)',
       steps: [
-        'Bonde de fond piscine à ~50 % : équilibrage de l\'aspiration entre le bac tampon (prioritaire) et le fond du bassin',
+        'Aspiration uniquement par les 2 bondes du bac tampon — bondes piscine et petit bassin FERMÉES',
+        '⚠️ Ne jamais ouvrir la bonde piscine (ou petit bassin) en même temps que les bondes du bac tampon : vases communicants, la piscine se vide dans le bac dont le niveau monte',
+        'Quand on utilise la bonde de fond (mode sans bac tampon), la brider à ~50 % pour l\'équilibrage',
         'Bypass électrolyseur à ~50 % : une partie de l\'eau contourne la cellule Zodiac Ei pour caler le débit qui la traverse (entrée et sortie restent ouvertes)',
-        'Balai et égouts fermés, toutes les autres vannes ouvertes en grand',
+        'Balai et égouts fermés, refoulements ouverts en grand',
         'Ajuste les % avec le curseur ci-dessus si les réglages réels diffèrent',
       ],
     },
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
-      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: false, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration normale (avec bac tampon)',
       steps: [
-        'Les deux bondes du bac tampon ouvertes, bonde de fond et balai fermés',
+        'Les deux bondes du bac tampon ouvertes — bondes piscine et petit bassin FERMÉES (sinon vases communicants : la piscine se vide dans le bac), balai fermé',
         'Vanne 6 voies sur FILTRATION',
         'Refoulements piscine (4 vannes : 2 mur bas + côté bassin + marches) et petit bassin ouverts, vanne égout fermée',
         'Électrolyseur Zodiac Ei en service (vannes entrée + sortie ouvertes, bypass fermé) — le détecteur de débit le coupe automatiquement sans circulation',
@@ -613,11 +615,11 @@
     sansbac: {
       label: '🚱 Filtration sans bac tampon',
       pump: true, pos: 'filtration',
-      v: { vbt1: false, vbt2: false, vb: true, vbl: false, vbb: true, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
+      v: { vbt1: false, vbt2: false, vb: 50, vbl: false, vbb: false, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration sans bac tampon',
       steps: [
-        'Fermer les deux bondes du bac tampon',
-        'Ouvrir la bonde de fond de la piscine',
+        'Fermer d\'abord les deux bondes du bac tampon — JAMAIS ouvertes en même temps que la bonde piscine (vases communicants)',
+        'Ouvrir ensuite la bonde de fond de la piscine (bridée à ~50 %)',
         'Vanne 6 voies sur FILTRATION, refoulements ouverts',
         '⚠️ Le débordement continue de remplir le bac tampon : surveiller le niveau de la piscine (l\'eau part dans le bac et n\'est pas réaspirée)',
       ],
@@ -816,6 +818,8 @@
 
     // Alertes
     const warnings = [];
+    if ((v.vb || v.vbb) && (v.vbt1 || v.vbt2))
+      warnings.push('⚠️ Vases communicants : bonde ' + (v.vb ? 'piscine' : 'petit bassin') + ' ET bondes du bac tampon ouvertes ensemble — la piscine se vide par gravité dans le bac tampon (son niveau monte). En fonctionnement normal, bondes piscine et petit bassin fermées.');
     if (state.pump && !hasSuction)
       warnings.push('⚠️ Pompe en marche sans aspiration ouverte — risque de marche à sec !');
     if (state.pump && hasSuction && !destOK && (toRef || toEgout))
