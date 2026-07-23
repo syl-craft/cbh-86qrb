@@ -114,6 +114,21 @@
 
   .mp-group button.active { background: #0369a1; border-color: #0369a1; color: #fff; }
 
+  .valve-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    color: #334155;
+  }
+
+  .valve-panel input[type="range"] { width: 180px; accent-color: #f59e0b; }
+  .valve-panel b { min-width: 42px; }
+
   /* --- SVG --- */
   .scene {
     width: 100%;
@@ -216,10 +231,13 @@
   .valve circle { fill: #fff; stroke-width: 3; }
   .valve.open circle { stroke: #10b981; }
   .valve.closed circle { stroke: #ef4444; }
+  .valve.partial circle { stroke: #f59e0b; }
   .valve rect { rx: 2; }
   .valve.open rect { fill: #10b981; }
   .valve.closed rect { fill: #ef4444; }
+  .valve.partial rect { fill: #f59e0b; }
   .valve text { font-size: 12px; fill: #475569; font-weight: 600; }
+  .valve text.pctLbl { font-size: 10px; fill: #b45309; font-weight: 700; }
 
   .lbl { font-size: 13px; fill: #475569; font-weight: 600; }
   .lbl-small { font-size: 11px; fill: #94a3b8; }
@@ -336,6 +354,11 @@
     <button class="pump-toggle" id="pumpBtn">⏻ Pompe</button>
     <button class="pump-toggle level" id="levelBtn">💧 Bac tampon : niveau OK</button>
     <div class="mp-group" id="mpGroup"><span class="mp-label">Vanne 6 voies :</span></div>
+    <div class="valve-panel" id="valvePanel" style="display:none">
+      <span class="mp-label">Ouverture <b id="valveName"></b> :</span>
+      <input type="range" id="valvePct" min="0" max="100" step="5" value="100">
+      <b id="valvePctVal">100%</b>
+    </div>
   </div>
 
   <div class="scene">
@@ -527,21 +550,21 @@
 
   // ---------- Vannes ----------
   const VALVES = {
-    vb:   { x: 505, y: 535, label: 'Bonde piscine',  lx: -108, ly: 4,   open: false },
-    vbl:  { x: 450, y: 495, label: 'Balai',          lx: 14,   ly: 4,   open: false },
-    vbb:  { x: 765, y: 505, label: 'Bonde bassin',   lx: -108, ly: 4,   open: true  },
-    vbt1: { x: 874, y: 480, label: 'Bonde bac G',    lx: -96,  ly: -12, open: true  },
-    vbt2: { x: 850, y: 160, label: 'Bonde bac D',    lx: -96,  ly: 4,   open: true  },
-    vr1:  { x: 185, y: 395, label: '',               lx: 0,    ly: 0,   open: true  },
-    vr3:  { x: 580, y: 395, label: '',               lx: 0,    ly: 0,   open: true  },
-    vr4:  { x: 660, y: 390, label: '',               lx: 0,    ly: 0,   open: true  },
-    vr5:  { x: 100, y: 380, label: 'Marches',        lx: -10,  ly: 26,  open: true  },
-    vrb:  { x: 712, y: 410, label: 'Refoul. bassin', lx: 14,   ly: 14,  open: true  },
-    ve:   { x: 560, y: 880, label: 'Égout',          lx: 14,   ly: -12, open: false },
-    vegr: { x: 820, y: 700, label: 'Égout gravitaire', lx: 14, ly: 4,   open: false },
-    vel1: { x: 345, y: 612, label: 'entrée',         lx: -56,  ly: 4,   open: true  },
-    vel2: { x: 345, y: 444, label: 'sortie',         lx: -56,  ly: 4,   open: true  },
-    vby:  { x: 390, y: 505, label: 'bypass',         lx: 12,   ly: 4,   open: false },
+    vb:   { x: 505, y: 535, label: 'Bonde piscine',  lx: -108, ly: 4,   pct: 50  },
+    vbl:  { x: 450, y: 495, label: 'Balai',          lx: 14,   ly: 4,   pct: 0   },
+    vbb:  { x: 765, y: 505, label: 'Bonde bassin',   lx: -108, ly: 4,   pct: 100 },
+    vbt1: { x: 874, y: 480, label: 'Bonde bac G',    lx: -96,  ly: -12, pct: 100 },
+    vbt2: { x: 850, y: 160, label: 'Bonde bac D',    lx: -96,  ly: 4,   pct: 100 },
+    vr1:  { x: 185, y: 395, label: '',               lx: 0,    ly: 0,   pct: 100 },
+    vr3:  { x: 580, y: 395, label: '',               lx: 0,    ly: 0,   pct: 100 },
+    vr4:  { x: 660, y: 390, label: '',               lx: 0,    ly: 0,   pct: 100 },
+    vr5:  { x: 100, y: 380, label: 'Marches',        lx: -10,  ly: 26,  pct: 100 },
+    vrb:  { x: 712, y: 410, label: 'Refoul. bassin', lx: 14,   ly: 14,  pct: 100 },
+    ve:   { x: 560, y: 880, label: 'Égout',          lx: 14,   ly: -12, pct: 0   },
+    vegr: { x: 820, y: 700, label: 'Égout gravitaire', lx: 14, ly: 4,   pct: 0   },
+    vel1: { x: 345, y: 612, label: 'entrée',         lx: -56,  ly: 4,   pct: 100 },
+    vel2: { x: 345, y: 444, label: 'sortie',         lx: -56,  ly: 4,   pct: 100 },
+    vby:  { x: 390, y: 505, label: 'bypass',         lx: 12,   ly: 4,   pct: 50  },
   };
 
   const MP_POSITIONS = [
@@ -554,11 +577,25 @@
     { id: 'hivernage',   label: 'Hivernage'   },
   ];
 
-  const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false };
+  const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false, selected: null };
+
+  function selectValve(id) { state.selected = id; }
   let renderedScenario = null;
 
   // ---------- Scénarios ----------
   const SCENARIOS = {
+    etat: {
+      label: '📷 État actuel (photos)',
+      pump: true, pos: 'filtration',
+      v: { vbt1: 100, vbt2: 100, vb: 50, vbl: 0, vbb: 100, vr1: 100, vr3: 100, vr4: 100, vr5: 100, vrb: 100, ve: 0, vegr: 0, vel1: 100, vel2: 100, vby: 50 },
+      title: 'État actuel de l\'installation (photos du 23/07/2026)',
+      steps: [
+        'Bonde de fond piscine à ~50 % : équilibrage de l\'aspiration entre le bac tampon (prioritaire) et le fond du bassin',
+        'Bypass électrolyseur à ~50 % : une partie de l\'eau contourne la cellule Zodiac Ei pour caler le débit qui la traverse (entrée et sortie restent ouvertes)',
+        'Balai et égouts fermés, toutes les autres vannes ouvertes en grand',
+        'Ajuste les % avec le curseur ci-dessus si les réglages réels diffèrent',
+      ],
+    },
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
@@ -665,15 +702,18 @@
       grp.id = 'valve_' + id;
       grp.innerHTML =
         '<circle cx="' + v.x + '" cy="' + v.y + '" r="11"/>' +
-        '<rect x="' + (v.x - 8) + '" y="' + (v.y - 3) + '" width="16" height="6"/>' +
+        '<rect class="handle" x="' + (v.x - 8) + '" y="' + (v.y - 3) + '" width="16" height="6"/>' +
+        '<text class="pctLbl" x="' + v.x + '" y="' + (v.y + 26) + '" text-anchor="middle"></text>' +
         (v.label ? '<text x="' + (v.x + v.lx) + '" y="' + (v.y + v.ly) + '">' + v.label + '</text>' : '');
       grp.addEventListener('click', () => {
-        v.open = !v.open;
-        // Bypass électrolyseur : bascule automatique des 3 vannes
+        // Cycle : 100 % -> 50 % -> 0 % -> 100 %
+        v.pct = v.pct === 0 ? 100 : (v.pct === 100 ? 50 : 0);
+        // Bypass électrolyseur à 100 % = entrée/sortie fermées ; partiel = équilibrage, tout reste ouvert
         if (id === 'vby') {
-          VALVES.vel1.open = !v.open;
-          VALVES.vel2.open = !v.open;
+          VALVES.vel1.pct = v.pct === 100 ? 0 : 100;
+          VALVES.vel2.pct = v.pct === 100 ? 0 : 100;
         }
+        selectValve(id);
         state.scenario = null;
         update();
       });
@@ -722,7 +762,7 @@
   // ---------- Logique de flux ----------
   function computeFlow() {
     const v = {};
-    Object.entries(VALVES).forEach(([id, val]) => v[id] = val.open);
+    Object.entries(VALVES).forEach(([id, val]) => v[id] = val.pct > 0);
 
     const hasSuction = v.vb || v.vbl || v.vbb || v.vbt1 || v.vbt2;
     const elPath  = v.vel1 && v.vel2; // passage dans l'électrolyseur = entrée ET sortie ouvertes
@@ -814,10 +854,24 @@
     // Animation interne du filtre à sable
     $('filterAnim').style.display = active.p_mpf ? '' : 'none';
 
-    // Vannes
+    // Vannes : couleur, rotation de la poignée (0 % = perpendiculaire) et % affiché
     Object.entries(VALVES).forEach(([id, v]) => {
-      $('valve_' + id).setAttribute('class', 'valve ' + (v.open ? 'open' : 'closed'));
+      const grp = $('valve_' + id);
+      const cls = v.pct === 0 ? 'closed' : (v.pct === 100 ? 'open' : 'partial');
+      grp.setAttribute('class', 'valve ' + cls);
+      grp.querySelector('.handle').setAttribute('transform',
+        'rotate(' + (90 - v.pct * 0.9) + ' ' + v.x + ' ' + v.y + ')');
+      grp.querySelector('.pctLbl').textContent = (v.pct > 0 && v.pct < 100) ? v.pct + '%' : '';
     });
+
+    // Curseur de réglage
+    if (state.selected) {
+      const sv = VALVES[state.selected];
+      $('valvePanel').style.display = '';
+      $('valveName').textContent = sv.label || state.selected.toUpperCase();
+      $('valvePct').value = sv.pct;
+      $('valvePctVal').textContent = sv.pct + '%';
+    }
 
     // Pompe
     $('pumpCircle').setAttribute('fill', state.pump ? '#10b981' : '#94a3b8');
@@ -873,7 +927,9 @@
     if (state.lowLevel) { state.pumpBeforeLow = sc.pump; state.pump = false; } // sécurité manque d'eau
     state.pos = sc.pos;
     state.scenario = id;
-    Object.entries(sc.v).forEach(([vid, open]) => VALVES[vid].open = open);
+    Object.entries(sc.v).forEach(([vid, val]) => {
+      VALVES[vid].pct = typeof val === 'number' ? val : (val ? 100 : 0);
+    });
     update();
   }
 
@@ -932,6 +988,19 @@
   };
   $('pumpBtn').addEventListener('click', togglePump);
   $('pumpBody').addEventListener('click', togglePump);
+
+  // Curseur de pourcentage d'ouverture de la vanne sélectionnée
+  $('valvePct').addEventListener('input', () => {
+    if (!state.selected) return;
+    const v = VALVES[state.selected];
+    v.pct = parseInt($('valvePct').value, 10);
+    if (state.selected === 'vby') {
+      VALVES.vel1.pct = v.pct === 100 ? 0 : 100;
+      VALVES.vel2.pct = v.pct === 100 ? 0 : 100;
+    }
+    state.scenario = null;
+    update();
+  });
   $('mpBody').addEventListener('click', () => {
     const i = MP_POSITIONS.findIndex(p => p.id === state.pos);
     state.pos = MP_POSITIONS[(i + 1) % MP_POSITIONS.length].id;
@@ -939,7 +1008,7 @@
     update();
   });
 
-  applyScenario('filtration');
+  applyScenario('etat');
 
   // ---------- Plein écran mobile (paysage + zoom + menu ⚙) ----------
   const overlay = $('fsOverlay');
