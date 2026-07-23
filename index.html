@@ -120,7 +120,96 @@
     background: #f8fafc;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
+    position: relative;
+    cursor: zoom-in;
   }
+
+  #fsOpen {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #0369a1;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    z-index: 5;
+  }
+
+  /* --- Plein écran --- */
+  #fsOverlay {
+    position: fixed;
+    inset: 0;
+    background: #f8fafc;
+    z-index: 1000;
+  }
+
+  #fsStage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  #fsOverlay.rotated #fsStage {
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(90deg) translateY(-100%);
+    transform-origin: top left;
+  }
+
+  #fsZoom {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+  }
+
+  #fsZoom svg { width: 100%; height: 100%; }
+
+  .fs-btn {
+    position: fixed;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #0369a1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1002;
+  }
+
+  #fsClose { top: 10px; right: 10px; }
+  #fsMenuBtn { top: 10px; left: 10px; }
+
+  #fsMenu {
+    position: fixed;
+    top: 62px;
+    left: 10px;
+    right: 10px;
+    max-width: 560px;
+    max-height: 72vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 12px;
+    z-index: 1001;
+  }
+
+  #fsMenu .scenarios, #fsMenu .controls { margin-bottom: 10px; }
 
   svg { display: block; width: 100%; height: auto; }
 
@@ -260,6 +349,7 @@
   </div>
 
   <div class="scene">
+  <button id="fsOpen" title="Plein écran">⛶</button>
   <svg viewBox="0 0 960 930" xmlns="http://www.w3.org/2000/svg">
     <!-- ================= BASSINS (positions réelles) ================= -->
     <!-- Bac tampon (en haut) -->
@@ -412,6 +502,14 @@
   <div class="warnings" id="warnings"></div>
 
   <div class="steps" id="steps"></div>
+</div>
+
+<!-- Plein écran mobile -->
+<div id="fsOverlay" style="display:none">
+  <div id="fsStage"><div id="fsZoom"></div></div>
+  <button class="fs-btn" id="fsMenuBtn" title="Contrôles">⚙</button>
+  <button class="fs-btn" id="fsClose" title="Fermer">✕</button>
+  <div id="fsMenu" style="display:none"></div>
 </div>
 
 <script>
@@ -832,6 +930,103 @@
   });
 
   applyScenario('filtration');
+
+  // ---------- Plein écran mobile (paysage + zoom + menu ⚙) ----------
+  const overlay = $('fsOverlay');
+  const fsZoom = $('fsZoom');
+  const sceneBox = document.querySelector('.scene');
+  const svgEl = sceneBox.querySelector('svg');
+  const INTERACTIVE = '.valve, #pumpBody, #mpBody, #sensorBody, #evBody, button';
+
+  // Emplacements d'origine des blocs déplacés dans le menu plein écran
+  const moved = ['scenarios', 'controls', 'warnings'].map(sel => {
+    const el = sel === 'warnings' ? $('warnings') : document.querySelector('.' + sel);
+    return { el, parent: el.parentNode, next: el.nextSibling };
+  });
+
+  let zs = 1, zx = 0, zy = 0;
+  const applyZoom = () => { fsZoom.style.transform = 'translate(' + zx + 'px,' + zy + 'px) scale(' + zs + ')'; };
+
+  function updateRotation() {
+    overlay.classList.toggle('rotated', window.innerHeight > window.innerWidth);
+  }
+
+  function openFS() {
+    overlay.style.display = '';
+    updateRotation();
+    fsZoom.appendChild(svgEl);
+    moved.forEach(m => $('fsMenu').appendChild(m.el));
+    document.body.style.overflow = 'hidden';
+    zs = 1; zx = 0; zy = 0; applyZoom();
+    if (document.documentElement.requestFullscreen)
+      document.documentElement.requestFullscreen().catch(() => {});
+    if (screen.orientation && screen.orientation.lock)
+      screen.orientation.lock('landscape')
+        .then(() => overlay.classList.remove('rotated'))
+        .catch(() => {});
+  }
+
+  function closeFS() {
+    overlay.style.display = 'none';
+    $('fsMenu').style.display = 'none';
+    sceneBox.appendChild(svgEl);
+    moved.forEach(m => m.parent.insertBefore(m.el, m.next));
+    document.body.style.overflow = '';
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (screen.orientation && screen.orientation.unlock) { try { screen.orientation.unlock(); } catch (e) {} }
+  }
+
+  $('fsOpen').addEventListener('click', e => { e.stopPropagation(); openFS(); });
+  sceneBox.addEventListener('click', e => {
+    if (e.target.closest(INTERACTIVE)) return;
+    openFS();
+  });
+  $('fsClose').addEventListener('click', closeFS);
+  $('fsMenuBtn').addEventListener('click', () => {
+    const m = $('fsMenu');
+    m.style.display = m.style.display === 'none' ? '' : 'none';
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') closeFS(); });
+  window.addEventListener('resize', () => { if (overlay.style.display !== 'none' && !document.fullscreenElement) updateRotation(); });
+
+  // Zoom pincé + déplacement au doigt (pointer events)
+  const stage = $('fsStage');
+  const pointers = new Map();
+  let lastDist = 0, lastPan = null;
+
+  stage.addEventListener('pointerdown', e => {
+    if (e.target.closest(INTERACTIVE)) return;
+    pointers.set(e.pointerId, e);
+    lastDist = 0; lastPan = null;
+  });
+
+  stage.addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, e);
+    const pts = [...pointers.values()];
+    if (pts.length === 2) {
+      const d = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      if (lastDist) {
+        zs = Math.min(6, Math.max(1, zs * d / lastDist));
+        applyZoom();
+      }
+      lastDist = d;
+      lastPan = null;
+    } else if (pts.length === 1) {
+      if (lastPan) {
+        let dx = e.clientX - lastPan.x, dy = e.clientY - lastPan.y;
+        if (overlay.classList.contains('rotated')) { const t = dx; dx = dy; dy = -t; }
+        zx += dx; zy += dy;
+        applyZoom();
+      }
+      lastPan = { x: e.clientX, y: e.clientY };
+    }
+  });
+
+  const endPointer = e => { pointers.delete(e.pointerId); lastDist = 0; lastPan = null; };
+  stage.addEventListener('pointerup', endPointer);
+  stage.addEventListener('pointercancel', endPointer);
+  stage.addEventListener('dblclick', () => { zs = 1; zx = 0; zy = 0; applyZoom(); });
 </script>
 </body>
 </html>
