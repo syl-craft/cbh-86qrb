@@ -96,6 +96,8 @@
   .pump-toggle.on { background: #10b981; }
   .pump-toggle.level { background: #10b981; }
   .pump-toggle.level.low { background: #f59e0b; }
+  .pump-toggle.clap { background: #10b981; }
+  .pump-toggle.clap.ko { background: #ef4444; }
 
   .mp-group { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
@@ -239,6 +241,17 @@
   .valve text { font-size: 12px; fill: #475569; font-weight: 600; }
   .valve text.pctLbl { font-size: 10px; fill: #b45309; font-weight: 700; }
 
+  /* Clapets anti-retour des bondes du bac tampon */
+  .clapets .cl-body { fill: #fff; stroke-width: 2.5; }
+  .clapets .cl-seat { stroke-width: 2.5; stroke-linecap: round; }
+  .clapets.ok .cl-body, .clapets.ok .cl-seat { stroke: #10b981; }
+  .clapets.ok .cl-flap { fill: #10b981; }
+  .clapets.ko .cl-body, .clapets.ko .cl-seat { stroke: #ef4444; }
+  .clapets.ko .cl-flap { fill: #ef4444; }
+  .clapets .cl-leaf { font-size: 13px; }
+  .clapets.ok .cl-leaf { display: none; }
+  .clapets .cl-lbl { font-size: 11px; fill: #94a3b8; font-weight: 600; }
+
   .lbl { font-size: 13px; fill: #475569; font-weight: 600; }
   .lbl-small { font-size: 11px; fill: #94a3b8; }
   .lbl-white { font-size: 13px; fill: #fff; font-weight: 700; }
@@ -346,13 +359,14 @@
 <body>
 <div class="card">
   <h1>💧 Flux hydraulique de la piscine</h1>
-  <div class="subtitle">Bassins à leur position réelle · local technique disposé comme le schéma des vannes · clique sur les vannes, la pompe ou la vanne 6 voies</div>
+  <div class="subtitle">Bassins à leur position réelle · local technique disposé comme le schéma des vannes · clique sur les vannes, les clapets, la pompe ou la vanne 6 voies</div>
 
   <div class="scenarios" id="scenarios"></div>
 
   <div class="controls">
     <button class="pump-toggle" id="pumpBtn">⏻ Pompe</button>
     <button class="pump-toggle level" id="levelBtn">💧 Bac tampon : niveau OK</button>
+    <button class="pump-toggle clap" id="clapBtn">🍂 Clapets bac : PROPRES</button>
     <div class="mp-group" id="mpGroup"><span class="mp-label">Vanne 6 voies :</span></div>
     <div class="valve-panel" id="valvePanel" style="display:none">
       <span class="mp-label">Ouverture <b id="valveName"></b> :</span>
@@ -464,6 +478,19 @@
     <path d="M898,896 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
     <path d="M903,908 q8,-8 16,0 q8,8 16,0" fill="none" stroke="#94a3b8" stroke-width="2"/>
 
+    <!-- Clapets anti-retour sur les 2 bondes du bac tampon (se bouchent avec les feuilles) -->
+    <g id="clapets" class="clapets ok" style="cursor:pointer">
+      <text class="cl-leaf" x="850" y="212" text-anchor="middle">🍂</text>
+      <rect class="cl-body" x="839" y="218" width="22" height="26" rx="4"/>
+      <path class="cl-flap" d="M842,224 L858,224 L850,236 Z"/>
+      <line class="cl-seat" x1="840" y1="240" x2="860" y2="240"/>
+      <text class="cl-leaf" x="874" y="252" text-anchor="middle">🍂</text>
+      <rect class="cl-body" x="863" y="258" width="22" height="26" rx="4"/>
+      <path class="cl-flap" d="M866,264 L882,264 L874,276 Z"/>
+      <line class="cl-seat" x1="864" y1="280" x2="884" y2="280"/>
+      <text class="cl-lbl" transform="rotate(-90 910 262)" x="910" y="262" text-anchor="middle">clapets anti-retour</text>
+    </g>
+
     <!-- ================= ÉQUIPEMENTS (disposition du schéma) ================= -->
     <!-- Pompe au centre -->
     <g id="pumpBody">
@@ -529,6 +556,7 @@
     <span><span class="dot" style="background:#cbd5e1"></span> tuyau inactif</span>
     <span><span class="dot" style="background:#10b981"></span> vanne ouverte</span>
     <span><span class="dot" style="background:#ef4444"></span> vanne fermée</span>
+    <span>🍂 clapets anti-retour du bac tampon (cliquables)</span>
   </div>
 
   <div class="warnings" id="warnings"></div>
@@ -577,7 +605,8 @@
     { id: 'hivernage',   label: 'Hivernage'   },
   ];
 
-  const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false, selected: null };
+  // clapets : true = clapets anti-retour des bondes du bac tampon propres / false = bouchés (feuilles)
+  const state = { pump: true, pos: 'filtration', scenario: 'filtration', lowLevel: false, clapets: true, selected: null };
 
   function selectValve(id) { state.selected = id; }
   let renderedScenario = null;
@@ -587,12 +616,14 @@
     etat: {
       label: '📷 État actuel (photos)',
       pump: true, pos: 'filtration',
-      v: { vbt1: 100, vbt2: 100, vb: 0, vbl: 0, vbb: 0, vr1: 100, vr3: 100, vr4: 100, vr5: 100, vrb: 100, ve: 0, vegr: 0, vel1: 100, vel2: 100, vby: 50 },
-      title: 'État actuel de l\'installation (photos du 23/07/2026)',
+      v: { vbt1: 100, vbt2: 100, vb: 25, vbl: 0, vbb: 0, vr1: 100, vr3: 100, vr4: 100, vr5: 100, vrb: 100, ve: 0, vegr: 0, vel1: 100, vel2: 100, vby: 50 },
+      clapets: true,
+      title: 'État actuel de l\'installation (photos du 23/07/2026, réglages mis à jour août 2026)',
       steps: [
-        'Aspiration uniquement par les 2 bondes du bac tampon — bondes piscine et petit bassin FERMÉES',
-        '⚠️ Ne jamais ouvrir la bonde piscine (ou petit bassin) en même temps que les bondes du bac tampon : vases communicants, la piscine se vide dans le bac dont le niveau monte',
-        'Quand on utilise la bonde de fond (mode sans bac tampon), la brider à ~50 % pour l\'équilibrage',
+        "Aspiration principale par les 2 bondes du bac tampon, + la bonde de fond de la piscine ouverte à ~1/4 (conseil du pisciniste : ça brasse le fond sans priver le bac tampon)",
+        "🍂 Chaque bonde du bac tampon est protégée par un CLAPET ANTI-RETOUR : c'est lui qui empêche la piscine de se vider dans le bac quand les deux aspirations sont ouvertes en même temps",
+        "⚠️ Retour d'expérience août 2026 : les 2 clapets étaient entièrement bouchés de feuilles → plus de non-retour (la piscine se vidait dans le bac tampon qui débordait), puis plus de débit du tout (les 2 bondes bouchées, pompe en manque d'eau). Clique sur les clapets du schéma pour simuler le cas.",
+        "Ne pas ouvrir la bonde de fond en grand : le bac tampon ne serait plus assez sollicité et déborderait. En mode sans bac tampon, la brider à ~50 % et ajuster au manomètre.",
         'Bypass électrolyseur à ~50 % : une partie de l\'eau contourne la cellule Zodiac Ei pour caler le débit qui la traverse (entrée et sortie restent ouvertes)',
         'Balai et égouts fermés, refoulements ouverts en grand',
         'Ajuste les % avec le curseur ci-dessus si les réglages réels diffèrent',
@@ -601,15 +632,18 @@
     filtration: {
       label: '🔄 Filtration normale',
       pump: true, pos: 'filtration',
-      v: { vbt1: true, vbt2: true, vb: false, vbl: false, vbb: false, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
-      title: 'Filtration normale (avec bac tampon)',
+      v: { vbt1: true, vbt2: true, vb: 25, vbl: false, vbb: false, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
+      title: 'Filtration normale (bac tampon + bonde de fond à 1/4)',
       steps: [
-        'Les deux bondes du bac tampon ouvertes — bondes piscine et petit bassin FERMÉES (sinon vases communicants : la piscine se vide dans le bac), balai fermé',
+        'Les deux bondes du bac tampon ouvertes en grand — c\'est l\'aspiration principale',
+        "Bonde de fond de la piscine ouverte à ~1/4 seulement (conseil du pisciniste) : elle brasse le fond du bassin. Plus ouverte, la pompe aspirerait surtout par le fond et le bac tampon déborderait.",
+        "🍂 Cette configuration ne tient que si les 2 clapets anti-retour des bondes du bac tampon sont PROPRES : bouchés, plus de non-retour et la piscine se vide par gravité dans le bac tampon. Les contrôler après chaque épisode de vent / chute de feuilles.",
+        'Bonde du petit bassin et balai fermés',
         'Vanne 6 voies sur FILTRATION',
         'Refoulements piscine (4 vannes : 2 mur bas + côté bassin + marches) et petit bassin ouverts, vanne égout fermée',
         'Électrolyseur Zodiac Ei en service (vannes entrée + sortie ouvertes, bypass fermé) — le détecteur de débit le coupe automatiquement sans circulation',
         'Le GenpH régule le pH automatiquement (cible ~7.2) — surveiller le niveau du bidon pH-',
-        'La piscine déborde → le bac tampon récupère l\'eau → la pompe aspire dans le bac',
+        'La piscine déborde → le bac tampon récupère l\'eau → la pompe aspire dans le bac (+ un filet par la bonde de fond)',
       ],
     },
     sansbac: {
@@ -618,8 +652,9 @@
       v: { vbt1: false, vbt2: false, vb: 50, vbl: false, vbb: false, vr1: true, vr3: true, vr4: true, vr5: true, vrb: true, ve: false, vegr: false, vel1: true, vel2: true, vby: false },
       title: 'Filtration sans bac tampon',
       steps: [
-        'Fermer d\'abord les deux bondes du bac tampon — JAMAIS ouvertes en même temps que la bonde piscine (vases communicants)',
-        'Ouvrir ensuite la bonde de fond de la piscine (bridée à ~50 %)',
+        'Fermer d\'abord les deux bondes du bac tampon, puis ouvrir la bonde de fond de la piscine',
+        "⚠️ NE PAS ouvrir la bonde de fond complètement : partir de ~50 % et ajuster",
+        "Équilibrer les deux contraintes : assez d'ouverture pour un débit constant et suffisant (préfiltre toujours plein, pas de bruit d'aspiration d'air ni de désamorçage) — mais pas trop, pour garder la pression du filtre à sable dans le VERT au manomètre",
         'Vanne 6 voies sur FILTRATION, refoulements ouverts',
         '⚠️ Le débordement continue de remplir le bac tampon : surveiller le niveau de la piscine (l\'eau part dans le bac et n\'est pas réaspirée)',
       ],
@@ -634,14 +669,14 @@
         'Arrêter la POMPE',
         'OUVRIR la vanne égout AVANT de fermer les refoulements → il y a toujours une sortie ouverte',
         'Fermer les refoulements piscine (4 vannes) et bassin',
-        'Ouvrir l\'aspiration bonde de fond (fermer les bondes du bac tampon si le niveau est trop bas)',
+        "Ouvrir l'aspiration bonde de fond — sans l'ouvrir en grand : garder un débit franc pour le contre-lavage tout en restant dans le vert au manomètre (fermer les bondes du bac tampon si son niveau est trop bas)",
         'Tourner la vanne 6 voies sur LAVAGE — UNIQUEMENT pompe à l\'arrêt (sinon surpression et joint étoile endommagé)',
         'Démarrer la pompe : lavage 2–3 min, en surveillant la SORTIE D\'EAU À L\'ÉGOUT jusqu\'à ce qu\'elle soit claire — seul vrai indicateur de fin (pas de voyant sur ce filtre)',
         'ℹ️ Si le remplissage automatique du bac se déclenche pendant le lavage, c\'est NORMAL (l\'eau part à l\'égout) — ce n\'est pas un signe de fin de lavage',
         'Arrêter la pompe, tourner sur RINÇAGE, pompe 30 s, arrêter la pompe — JAMAIS de retour en filtration sans rinçage (l\'eau sale du filtre repartirait dans la piscine par les buses)',
         'Tourner sur FILTRATION (pompe toujours à l\'arrêt)',
         'ROUVRIR les refoulements AVANT de refermer la vanne égout → jamais toutes sorties fermées',
-        'Rétablir l\'aspiration normale (bondes bac tampon), fermer la bonde si besoin',
+        "Rétablir l'aspiration normale : bondes du bac tampon en grand, bonde de fond ramenée à ~1/4",
         'Démarrer la pompe, vérifier la pression au manomètre, puis relancer l\'électrolyseur',
       ],
     },
@@ -659,6 +694,26 @@
         'Rouvrir les vannes, remplir le préfiltre d\'eau (amorçage), relancer la pompe',
       ],
     },
+    clapets: {
+      label: '🍂 Nettoyage clapets anti-retour',
+      pump: false, pos: 'ferme', clapets: false,
+      v: { vbt1: 100, vbt2: 100, vb: 0, vbl: 0, vbb: 0, vr1: 0, vr3: 0, vr4: 0, vr5: 0, vrb: 0, ve: 0, vegr: 100, vel1: 0, vel2: 0, vby: 0 },
+      title: 'Nettoyage des 2 clapets anti-retour des bondes du bac tampon',
+      steps: [
+        "Symptômes qui doivent y faire penser : le bac tampon déborde alors que le niveau de la piscine baisse, la pompe perd son débit / se désamorce, le remplissage automatique se déclenche sans arrêt",
+        'Couper l\'électrolyseur puis la POMPE (et son alimentation au tableau)',
+        "Vider le bac tampon : ouvrir la vanne égout gravitaire, pompe à l'arrêt. Si le bac ne se vide pas ou à peine, le diagnostic est fait : les clapets sont bouchés (écoper / siphonner le reste)",
+        'Fermer les 2 vannes des bondes du bac tampon, puis refermer la vanne égout gravitaire',
+        "Dévisser les écrous des raccords union de part et d'autre du clapet — prévoir un seau, le tronçon est encore plein d'eau",
+        "Sortir le clapet, retirer les feuilles et débris du battant et du siège, rincer. Vérifier que le battant bascule librement ET se referme bien à plat (c'est lui qui bloque le retour vers le bac tampon)",
+        "Remonter en respectant la flèche FLOW gravée sur le corps (sens de l'eau : bac tampon → pompe), joint propre, serrage à la main",
+        'Refaire l\'opération sur le second clapet',
+        "Rouvrir les 2 bondes du bac tampon, laisser le bac se remplir, remplir le préfiltre d'eau (amorçage) puis relancer la pompe",
+        'Vérifier le débit, la pression au manomètre, puis relancer l\'électrolyseur',
+        "Une fois les clapets propres, repasse le bouton « 🍂 Clapets bac » sur PROPRES pour retrouver le fonctionnement normal du schéma",
+        'À refaire après chaque épisode de vent / chute de feuilles, et systématiquement à l\'hivernage',
+      ],
+    },
     hivernage: {
       label: '❄️ Hivernage',
       pump: false, pos: 'hivernage',
@@ -667,7 +722,9 @@
       steps: [
         'Faire un dernier lavage + rinçage du filtre, puis arrêter la pompe',
         'Couper et vidanger l\'électrolyseur (retirer la cellule si gel possible), fermer ses 3 vannes',
-        'Baisser le niveau d\'eau sous les refoulements, vider le bac tampon par la vanne égout gravitaire',
+        'Baisser le niveau d\'eau sous les refoulements',
+        'Vider entièrement le bac tampon par la vanne égout gravitaire (pompe à l\'arrêt)',
+        "🍂 Démonter et nettoyer les 2 clapets anti-retour des bondes du bac tampon (ils se bouchent de feuilles) — voir la procédure dédiée, et les remonter dans le sens FLOW",
         'Fermer toutes les vannes',
         'Vidanger la pompe, le préfiltre et le filtre à sable (bouchons de purge)',
         'Mettre la vanne 6 voies en position HIVERNAGE (entre deux positions)',
@@ -767,7 +824,10 @@
     const v = {};
     Object.entries(VALVES).forEach(([id, val]) => v[id] = val.pct > 0);
 
-    const hasSuction = v.vb || v.vbl || v.vbb || v.vbt1 || v.vbt2;
+    const clapOK = state.clapets;               // clapets anti-retour des bondes du bac tampon
+    const btOpen = v.vbt1 || v.vbt2;            // vannes des bondes du bac tampon ouvertes
+    const btFlow = btOpen && clapOK;            // ... et qui débitent réellement
+    const hasSuction = v.vb || v.vbl || v.vbb || btFlow;
     const elPath  = v.vel1 && v.vel2; // passage dans l'électrolyseur = entrée ET sortie ouvertes
     const outPath = elPath || v.vby;
     const poolRef = v.vr1 || v.vr3 || v.vr4 || v.vr5;
@@ -779,16 +839,16 @@
     const filterUsed = state.pos === 'filtration' || state.pos === 'lavage' || state.pos === 'rincage';
 
     const active = {
-      p_vbt1:  flow && v.vbt1,
-      p_vbt2:  flow && v.vbt2,
+      p_vbt1:  flow && v.vbt1 && clapOK,
+      p_vbt2:  flow && v.vbt2 && clapOK,
       p_vb:    flow && v.vb,
       p_vbl:   flow && v.vbl,
       p_vbb:   flow && v.vbb,
-      p_colR1: flow && v.vbt1,
-      p_colR2: flow && (v.vbt1 || v.vbt2),
-      p_colR3: flow && (v.vbt1 || v.vbt2 || v.vbb),
-      p_colR4: flow && (v.vbt1 || v.vbt2 || v.vbb || v.vbl),
-      p_colR5: flow && (v.vbt1 || v.vbt2 || v.vbb || v.vbl || v.vb),
+      p_colR1: flow && v.vbt1 && clapOK,
+      p_colR2: flow && btFlow,
+      p_colR3: flow && (btFlow || v.vbb),
+      p_colR4: flow && (btFlow || v.vbb || v.vbl),
+      p_colR5: flow && (btFlow || v.vbb || v.vbl || v.vb),
       p_feed:  flow,
       p_pout:  flow,
       p_mpf:   flow && filterUsed,
@@ -810,7 +870,7 @@
       p_manb:  flow && toRef && outPath && v.vrb,
       p_manb2: flow && toRef && outPath && v.vrb,
       p_ego:   flow && toEgout && v.ve,
-      p_veg:   v.vegr && (v.vbt1 || v.vbt2 || v.vbb || v.vb || v.vbl),
+      p_veg:   v.vegr && (btFlow || v.vbb || v.vb || v.vbl),
       p_ov1:   flow && toRef && outPath && poolRef,
       p_ov2:   flow && toRef && outPath && poolRef,
       p_ov3:   flow && toRef && outPath && poolRef,
@@ -819,8 +879,21 @@
 
     // Alertes
     const warnings = [];
-    if ((v.vb || v.vbb) && (v.vbt1 || v.vbt2))
-      warnings.push('⚠️ Vases communicants : bonde ' + (v.vb ? 'piscine' : 'petit bassin') + ' ET bondes du bac tampon ouvertes ensemble — la piscine se vide par gravité dans le bac tampon (son niveau monte). En fonctionnement normal, bondes piscine et petit bassin fermées.');
+    const btAndPool = btOpen && (v.vb || v.vbb);
+    if (btAndPool && !clapOK)
+      warnings.push("⛔ Clapets anti-retour BOUCHÉS + bonde " + (v.vb ? 'piscine' : 'petit bassin') + " et bondes du bac tampon ouvertes ensemble : plus aucun non-retour, la piscine (plus haute) se vide par gravité dans le bac tampon, qui déborde. C'est exactement l'incident constaté — nettoyer les clapets avant de rouvrir les deux aspirations.");
+    else if (btAndPool && v.vb && VALVES.vb.pct > 50)
+      warnings.push("⚠️ Bonde de fond trop ouverte (" + VALVES.vb.pct + " %) en plus du bac tampon : la pompe aspire surtout par le fond, le bac tampon n'est plus assez sollicité et peut déborder. La brider à ~25 % (1/4).");
+    else if (btAndPool && v.vb)
+      warnings.push("ℹ️ Bonde de fond ouverte à ~1/4 en plus des bondes du bac tampon : configuration conseillée par le pisciniste (brassage du fond). Elle ne tient que grâce aux 2 clapets anti-retour du bac tampon — les garder propres.");
+    else if (btAndPool && v.vbb)
+      warnings.push("⚠️ Bonde du petit bassin ouverte en même temps que les bondes du bac tampon : à n'ouvrir que ponctuellement et seulement avec des clapets anti-retour propres (sinon le petit bassin se vide dans le bac).");
+    if (!clapOK && btOpen)
+      warnings.push("⛔ Clapets anti-retour BOUCHÉS (feuilles) : les 2 bondes du bac tampon ne débitent plus — la pompe manque d'eau et se désamorce. Voir la procédure « 🍂 Nettoyage clapets anti-retour ».");
+    else if (!clapOK)
+      warnings.push("🍂 Clapets anti-retour du bac tampon encrassés : à démonter et nettoyer (procédure dédiée) — ils se bouchent avec les feuilles.");
+    if (state.pump && !btOpen && v.vb && VALVES.vb.pct > 60)
+      warnings.push("⚠️ Sans bac tampon, ne pas ouvrir la bonde de fond en grand (" + VALVES.vb.pct + " %) : chercher l'équilibre entre un débit constant et suffisant pour la pompe (préfiltre toujours plein, aucun bruit d'aspiration d'air) et une pression du filtre à sable dans le VERT au manomètre.");
     if (state.pump && !hasSuction)
       warnings.push('⚠️ Pompe en marche sans aspiration ouverte — risque de marche à sec !');
     if (state.pump && hasSuction && !destOK && (toRef || toEgout))
@@ -831,7 +904,9 @@
       warnings.push('ℹ️ Eau envoyée à l\'égout — le niveau de la piscine baisse.');
     if (v.vegr && state.pump)
       warnings.push('⚠️ Vanne égout gravitaire ouverte avec la pompe en marche — la pompe risque d\'aspirer de l\'air et le circuit se vide à l\'égout !');
-    else if (v.vegr && (v.vbt1 || v.vbt2 || v.vbb || v.vb || v.vbl))
+    else if (v.vegr && btOpen && !clapOK)
+      warnings.push("🍂 Égout gravitaire ouvert mais le bac tampon ne se vide pas : les clapets anti-retour bouchés bloquent l'écoulement. C'est le symptôme qui permet de les diagnostiquer sans rien démonter.");
+    else if (v.vegr && (btFlow || v.vbb || v.vb || v.vbl))
       warnings.push('ℹ️ Vidange gravitaire en cours — le bac tampon / collecteur se vide à l\'égout (sans pompe).');
     if (state.pump && toRef && (v.vel1 !== v.vel2) && !v.vby)
       warnings.push('⚠️ Vannes électrolyseur incohérentes : entrée et sortie doivent être ouvertes toutes les deux (ou bypass ouvert).');
@@ -896,6 +971,9 @@
     $('evRect').setAttribute('fill', state.lowLevel ? '#f59e0b' : '#94a3b8');
     $('sensorFloat').setAttribute('cy', state.lowLevel ? 66 : 54);
     $('sensorFloat').setAttribute('fill', state.lowLevel ? '#ef4444' : '#10b981');
+    $('clapets').setAttribute('class', 'clapets ' + (state.clapets ? 'ok' : 'ko'));
+    $('clapBtn').classList.toggle('ko', !state.clapets);
+    $('clapBtn').textContent = state.clapets ? '🍂 Clapets bac : PROPRES' : '🍂 Clapets bac : BOUCHÉS';
     $('levelBtn').classList.toggle('low', state.lowLevel);
     $('levelBtn').textContent = state.lowLevel ? '💧 Bac tampon : NIVEAU BAS' : '💧 Bac tampon : niveau OK';
 
@@ -934,6 +1012,7 @@
     if (state.lowLevel) { state.pumpBeforeLow = sc.pump; state.pump = false; } // sécurité manque d'eau
     state.pos = sc.pos;
     state.scenario = id;
+    if ('clapets' in sc) state.clapets = sc.clapets;
     Object.entries(sc.v).forEach(([vid, val]) => {
       VALVES[vid].pct = typeof val === 'number' ? val : (val ? 100 : 0);
     });
@@ -987,6 +1066,11 @@
   $('sensorBody').addEventListener('click', toggleLevel);
   $('evBody').addEventListener('click', toggleLevel);
 
+  // État des clapets anti-retour des bondes du bac tampon (propres / bouchés de feuilles)
+  const toggleClapets = () => { state.clapets = !state.clapets; state.scenario = null; update(); };
+  $('clapBtn').addEventListener('click', toggleClapets);
+  $('clapets').addEventListener('click', toggleClapets);
+
   const togglePump = () => {
     if (state.lowLevel && !state.pump) { update(); return; } // verrouillée tant que le niveau est bas
     state.pump = !state.pump;
@@ -1022,7 +1106,7 @@
   const fsZoom = $('fsZoom');
   const sceneBox = document.querySelector('.scene');
   const svgEl = sceneBox.querySelector('svg');
-  const INTERACTIVE = '.valve, #pumpBody, #mpBody, #sensorBody, #evBody, button';
+  const INTERACTIVE = '.valve, #pumpBody, #mpBody, #sensorBody, #evBody, #clapets, button';
 
   // Emplacements d'origine des blocs déplacés dans le menu plein écran
   const moved = ['scenarios', 'controls', 'warnings'].map(sel => {
